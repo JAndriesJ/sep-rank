@@ -1,6 +1,14 @@
-using sep-rank
-using Test
+module runTests
+sep_rank_proj_path = dirname(dirname(@__FILE__))
+# Pkg.activate(sep_rank_proj_path)
 
-@testset "sep-rank.jl" begin
-    # Write your tests here.
+testDir = dirname(@__FILE__)
+include(testDir*"\\testUtils_states.jl")
+include(testDir*"\\testExamples.jl")
+include(testDir*"\\testUtils.jl")
+include(testDir*"\\testMoments.jl")
+# include(testDir*"\\testSep_Constriants.jl")
+include(testDir*"\\testSep_Model.jl")
+include(testDir*"\\testSep_Compute.jl")
+
 end
