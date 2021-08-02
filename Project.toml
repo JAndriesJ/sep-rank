@@ -1,0 +1,13 @@
+name = "sep-rank"
+uuid = "a00c84d5-f954-4ec9-a545-a5214f19d1f1"
+authors = ["Andries Steenkamp <j.andries.j.steenkamp@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
