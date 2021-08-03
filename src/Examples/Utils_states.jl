@@ -11,7 +11,8 @@ export maketraceone,
 
 """ Returns the partial transpose of the sysemt. """
 function take_Pᵀ(ρ,sys,d)
-    d₁,d₂ = d
+    #d₁,d₂ = d
+    d₂,d₁ = d
     D = [(i₁,i₂,j₁,j₂)   for i₁ in 1:d₁, i₂ in 1:d₁, j₁ in 1:d₂, j₂ in 1:d₂]
     rcs =  [(i,j)   for j in 1:d₂  for i in 1:d₁]
     DB₀ = [D[ij[1],kl[1],ij[2],kl[2]] for ij in rcs , kl in rcs ]
