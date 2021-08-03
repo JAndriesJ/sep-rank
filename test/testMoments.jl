@@ -1,14 +1,10 @@
 module testMoments
 using Test
-using LinearAlgebra
+using LinearAlgebra ; const la = LinearAlgebra
 
 srcDir = dirname(dirname(@__FILE__))*"\\src\\"
 include(srcDir*"Moments.jl")
-import .Moments
-
-
-const la = LinearAlgebra
-const mom = Moments
+import .Moments ; const mom = Moments
 
 @testset "eᵢ" begin
     n = 7
@@ -71,7 +67,6 @@ end
     M_mat =  mom.make_mon_expo(d,(t,t))
     @assert M_vec == M_mat[1,:]
 end
-
 
 @testset "make_mom_expo_keys" begin
     n = 3
@@ -138,6 +133,25 @@ end
     xx̄ᵀ_tens_yȳᵀ = mom.make_xx̄ᵀ_tens_yȳᵀ(d)
 end
 
+@test mom.split_expo([1,1,1,2,2,2,3,3,3,4,4,4],3,3) == ([1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4])
+
+
+@testset "get_xx̄yȳMM_blocks" begin
+    d₁ = rand(2:4); t₁ = rand(2:4)
+    d = (d₁,d₁) ; t = (t₁,t₁)
+    xx̄yȳMM_blocks = mom.get_xx̄yȳMM_blocks(d,t)
+    for b in keys(xx̄yȳMM_blocks)
+        REF = map(x-> mom.split_expo(x,d...),xx̄yȳMM_blocks[b])
+        rp =  sum.(map(v -> v[1]-v[2],REF)) ; sp  = sum.(map(v -> v[3]-v[4],REF))
+
+        @test length(unique(rp)) == 1
+        @test length(unique(sp)) == 1
+        @test (rp[1,1],sp[1,1]) .÷ 2 == b
+    end
+end
+
+
+
 @testset "get_ℂ_block_diagᵀ" begin
 
 for b in keys(xx̄yȳMM_blocks)
@@ -155,7 +169,7 @@ for b in keys(xx̄yȳMM_blocks)
 end
 
 pf(x) = prod(factorial.(x))
-@test split_expo([1,1,1,2,2,2,3,3,3,4,4,4],(3,3)) == ([1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4])
+
 γ,γᶥ,δ,δᶥ = split_expo([2,0,0,0,0,0,1,0,0,0,0,0],(3,3))
 η,ηᶥ,ζ,ζᶥ = split_expo([0,0,0,0,0,0,2,0,0,0,0,0],(3,3))
 a = ((-1)^sum(δᶥ + ζᶥ) * (im)^sum(δ+δᶥ+ζ+ζᶥ))* pf(γ + δ) * pf(γᶥ + δᶥ) * pf(η + ζ) * pf(ηᶥ + ζᶥ)

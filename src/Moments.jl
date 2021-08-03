@@ -8,9 +8,10 @@ export make_mon_expo,
        var_kron,
        var_kron_C,
        eᵢ,
+       split_expo,
        get_ℜℑααᶥββᶥᴿ,
        get_xx̄yȳMM_blocks,
-       get_γγᶥζζᶥ_δδᶥηηᶥ
+       get_γδ_dict
 
 
 
@@ -25,7 +26,7 @@ function var_kron(A,B)
    return [C_temp[ij[2],kl[2],ij[1],kl[1]] for ij in rcs , kl in rcs ]
 end
 
-function var_kron_C(A,B)
+function var_kron_C(A,B) ### TODO : THIS IS A HOTFIX AND NOT A SOLUTION
    C_temp = [ [a] + b for  b in B, a ∈ A]
    rcs =  [(i,j) for i in 1:size(A)[1] for j in 1:size(B)[1]]
    return [C_temp[ij[2],kl[2],ij[1],kl[1]] for ij in rcs , kl in rcs ]
@@ -45,39 +46,28 @@ end
 function make_mon_expo(n::Int,t::Tuple{Int,Int}; isle::Bool = true)
     M_vec1      = make_mon_expo(n,t[1]; isle=isle)
     M_vec2      = make_mon_expo(n,t[2]; isle=isle)
-    M_mat_flat  = [ mi+ mj for mi in M_vec1 for mj in M_vec2]
-    M_mat       = reshape(M_mat_flat, (length(M_vec1), length(M_vec2)) )
-    return M_mat
+    M_mat_flat  = [mi+mj for mi in M_vec1, mj in M_vec2]
 end
 
 ## Complex moments
 """[x,̄x]≦ₜ or [x,̄x]ᵀ₌ₜ"""
 make_mon_expo(d::Tuple{Int,Int},t::Int; isle::Bool = true) = make_mon_expo(sum(2 .* d),t; isle=isle)
 
-"""[x,̄x]≦ₜ[x,̄x]*≦ₜ or [x,̄x]₌ₜ[x,̄x]*₌ₜ
-but is actually [xᵣₑ,xᵢₘ]≦ₜ[xᵣₑ,xᵢₘ]ᵀ≦ₜ or [xᵣₑ,xᵢₘ]₌ₜ[xᵣₑ,xᵢₘ]ᵀ₌ₜ
-"""
-function make_mon_expo(d::Tuple{Int,Int},t::Tuple{Int,Int}; isle::Bool = true)
-    M_vec1      = make_mon_expo(d,t[1]; isle=isle)
-    M_vec2      = make_mon_expo(d,t[1]; isle=isle)
-    M_mat      = [ mi+ mj for mi in M_vec1, mj in M_vec2]
-    # M_mat       = reshape(M_mat_flat, (length(M_vec1), length(M_vec2)) )
-    return M_mat
-end
+"""[x,̄x]≦ₜ[x,̄x]*≦ₜ or [x,̄x]₌ₜ[x,̄x]*₌ₜ but is actually [xᵣₑ,xᵢₘ]≦ₜ[xᵣₑ,xᵢₘ]ᵀ≦ₜ or [xᵣₑ,xᵢₘ]₌ₜ[xᵣₑ,xᵢₘ]ᵀ₌ₜ """
+make_mon_expo(d::Tuple{Int,Int},t::Tuple{Int,Int}; isle::Bool = true) = make_mon_expo(sum(2 .* d),t; isle=isle)
+
 ## Real
 """xxᵀ⊗yyᵀ"""
 function make_xxᵀ_tens_yyᵀ(d)
-    n = sum(d)
-    pre_expo = make_mon_expo(n,1;isle = false)
-    x, y = pre_expo[1:d[1]], pre_expo[d[1]+1:n]
-    return var_kron(x .+ reshape(x,1,d[1]), y .+ reshape(y,1,d[2]))
+    n = sum(d); p_ex = make_mon_expo(n,1;isle = false)
+    x, y = p_ex[1:d[1]], p_ex[d[1]+1:n]
+    return var_kron(x .+ reshape(x,1,:), y .+ reshape(y,1,:))
 end
 
 """Returns diagonal block of the momoment matrix with partition:
     xᵃ⁺ᶜyᵇ⁺ᵈ where |a+c|,|b+d| ∈ 2N """
 function get_ℝ_block_diag(d::Tuple{Int,Int},t::Tuple{Int,Int})
     mom_mat = Moments.make_mon_expo(sum(d),t)
-    # return Dict("Default" => mom_mat)
     mom_vec = mom_mat[1,:]
     halfsum(arr) = [sum(arr[1:d[1]]),sum(arr[(d[1]+1):end])]
     tf(arr)      = map(x -> (isodd(x[1]),isodd(x[2])), halfsum.(arr))
@@ -145,26 +135,26 @@ function make_xx̄ᵀ_tens_yȳᵀ(d)
                 "imag" => Imag_dict)
 end
 
-
-
-
 ## Block diagonalization
 # The complex blocks
 """Splits a vector of exponents into the register components ααᶥββᶥ →  (α,αᶥ,β,βᶥ)"""
-split_expo(ααᶥββᶥ,d) =     (ααᶥββᶥ[1:d[1]],
-                            ααᶥββᶥ[d[1]+1:2*d[1]],
-                            ααᶥββᶥ[1+2*d[1]:2*d[1]+d[2]],
-                            ααᶥββᶥ[1+2*d[1]+d[2]:end])
+# split_expo(ααᶥββᶥ,d) =     (ααᶥββᶥ[1:d[1]],
+#                             ααᶥββᶥ[d[1]+1:2*d[1]],
+#                             ααᶥββᶥ[1+2*d[1]:2*d[1]+d[2]],
+#                             ααᶥββᶥ[1+2*d[1]+d[2]:end])
+
+split_expo(ααᶥββᶥ,d₁,d₂) = (ααᶥββᶥ[1:d₁],ααᶥββᶥ[d₁+1:2*d₁],
+                            ααᶥββᶥ[1+2*d₁:2*d₁+d₂],ααᶥββᶥ[1+2*d₁+d₂:end])
 
 """Gets the principal block of the moment matrix after block diagonalization"""
 function get_xx̄yȳMM_blocks(d,t)
-    Iᵗ = Moments.make_mon_expo(d,t[1])
-    Iᵗ_temp = map(x ->  sum.(split_expo(x,d)),Iᵗ)
+    Iᵗ = make_mon_expo(d,t[1])
+    Iᵗ_temp = map(x ->  sum.(split_expo(x,d...)),Iᵗ)
     r_list  = map(v -> v[1]-v[2],Iᵗ_temp) ; s_list  = map(v -> v[3]-v[4],Iᵗ_temp)
 
     Iᵗ_d = Dict()
     for r ∈ -t[1]:t[1], s ∈ -t[1]:t[1]
-        T = Iᵗ[(r_list .== r) .& (s_list .== s) ]
+        T = Iᵗ[(r_list .== r) .& (s_list .== s)]
         isempty(T) ? continue : Iᵗ_d[r,s] = T
     end
     return Dict(zip(keys(Iᵗ_d),[Iᵗ_d[k] .+ reshape(Iᵗ_d[k],1,:) for k in keys(Iᵗ_d)]))
@@ -174,58 +164,59 @@ end
 """Returns all  (γ,γᶥ,ζ,ζᶥ),(δ,δᶥ,η,ηᶥ) ∈ (ℕᵈ)⁴ s.t.
 (γ,γᶥ,ζ,ζᶥ)+(δ,δᶥ,η,ηᶥ)=(α,αᶥ,β,βᶥ)  ∀  ααᶥββᶥ ∈ Moment matrixₜ
 """
-function get_γγᶥζζᶥ_δδᶥηηᶥ(d,t)
+function get_γδ_dict(d,t)
     M = Moments.make_mon_expo(d,t)
     M_vec = M[:,1]
-    γγᶥζζᶥ_δδᶥηηᶥ_dict = Dict()
-    for k in Moments.make_mon_expo(d,2*t[1])# Define variables in the moment matrix.
+    γδ_dict = Dict()
+    for k in Moments.make_mon_expo(d,2*t[1])
         fd = hcat(map(x -> [x[1],x[2]],findall(M .== [k]))...)
-        γγᶥζζᶥ_δδᶥηηᶥ_dict[k] = [M_vec[fd[1,:]], M_vec[fd[2,:]]]
+        γδ_dict[k] = [M_vec[fd[1,:]], M_vec[fd[2,:]]]
     end
-    return γγᶥζζᶥ_δδᶥηηᶥ_dict
+    return γδ_dict
 end
 
 """The coefficients function"""
-pf(x) = prod(factorial.(x))
-function get_coef(part1,part2,d)
-    γ,γᶥ,ζ,ζᶥ = split_expo(part1,d) ; δ,δᶥ,η,ηᶥ = split_expo(part2,d)
-    a = ((-1.0)^sum(δᶥ+ηᶥ))*((1.0im)^sum(δ+δᶥ+η+ηᶥ))*prod(pf.([[γ,γᶥ,ζ,ζᶥ]+[δ,δᶥ,η,ηᶥ]...]))
-    return a/prod(pf.([γ,γᶥ,ζ,ζᶥ,δ,δᶥ,η,ηᶥ]))
+f_temp(X) = prod(map(x-> prod(factorial.(x)),X))
+function get_coef(p1,p2,d)
+    γ,γᶥ,ζ,ζᶥ = Moments.split_expo(p1,d...) ; δ,δᶥ,η,ηᶥ = Moments.split_expo(p2,d...)
+    a = ((-1.0)^sum(δᶥ+ηᶥ))*((1.0im)^sum(δ+δᶥ+η+ηᶥ))*f_temp([[γ,γᶥ,ζ,ζᶥ]+[δ,δᶥ,η,ηᶥ]...])
+    return a/f_temp([γ,γᶥ,ζ,ζᶥ,δ,δᶥ,η,ηᶥ])
 end
-get_coef(γ_δ_pair,d) = map((x,y)->get_coef(x,y,d),γ_δ_pair...)
-
+get_coef(p1p2_arr,d) = map((x,y)->get_coef(x,y,d),p1p2_arr...)
 
 """ get_expo(γγᶥδδᶥ,ζζᶥηηᶥ,d) = [γ+γᶥ,δ+δᶥ,η+ηᶥ,ζ+ζᶥ] """
-function get_expo(γ_,δ_,d)
-    γ,γᶥ,ζ,ζᶥ = split_expo(γ_,d) ; δ,δᶥ,η,ηᶥ = split_expo(δ_,d)
+function get_expo(p1,p2,d)
+    γ,γᶥ,ζ,ζᶥ = split_expo(p1,d...) ; δ,δᶥ,η,ηᶥ = split_expo(p2,d...)
     return vcat(γ+γᶥ,δ+δᶥ,ζ+ζᶥ,η+ηᶥ)
 end
-get_expo(γ_δ_,d) = map((x,y)->get_expo(x,y,d),γ_δ_...)
-
+get_expo(p1p2_arr,d) = map((x,y)->get_expo(x,y,d),p1p2_arr...)
 
 """f"""
-function get_ℜℑααᶥββᶥᴿ(d,ααᶥββᶥ::Array{Int64,1},γdict)
-    γ_δ_ = γdict[ααᶥββᶥ]
-    return   get_expo(γ_δ_,d),get_coef(γ_δ_,d)
+function get_ℜℑααᶥββᶥ(d,ααᶥββᶥ::Array{Int64,1},γδ_dict)
+    γδ = γδ_dict[ααᶥββᶥ]
+    return get_coef(γδ,d),get_expo(γδ,d)
 end
 
-function get_ℜℑααᶥββᶥᴿ(d,B,γdict)
-    MMex = map(x->get_ℜℑααᶥββᶥᴿ(d,x,γdict)[1],B)
-    MMCoef = map(x->get_ℜℑααᶥββᶥᴿ(d,x,γdict)[2],B)
+function get_ℝℂ_coefexpo(coef,expo)
+    ℝmask = isreal.(coef)
+    ℝcoef = real(coef[ℝmask])   ; ℝexpo = expo[ℝmask]
+    ℂcoef = imag(coef[.!ℝmask]) ; ℂexpo = expo[.!ℝmask]
+    return (ℝcoef,ℝexpo),(ℂcoef,ℂexpo)
+end
 
-    real_mask = isreal.(MMCoef)
+function get_ℜℑααᶥββᶥᴿ(d,B,γδ_dict)
+    s₁,s₂ = size(B)
+    MM = map(x-> Moments.get_ℜℑααᶥββᶥ(d,x,γδ_dict),B)
+    MMℝℂ = map(x-> get_ℝℂ_coefexpo(x...),MM)
 
-    RMMex = copy(MMex) ; IMMex = copy(MMex)
-    RMMex[.!real_mask] .= [[]]
-    IMMex[real_mask] .= [[]]
+    ℝcoef = [MMℝℂ[i,j][1][1] for i in 1:s₁, j in 1:s₂]
+    ℝexpo = [MMℝℂ[i,j][1][2] for i in 1:s₁, j in 1:s₂]
+    ℂcoef = [MMℝℂ[i,j][2][1] for i in 1:s₁, j in 1:s₂]
+    ℂexpo = [MMℝℂ[i,j][2][2] for i in 1:s₁, j in 1:s₂]
 
-    RMMCoef = copy(MMCoef) ; IMMCoef = copy(MMCoef)
-    RMMCoef[.!real_mask] .= [[0.0]] ;RMMCoef = real.(RMMCoef)
-    IMMCoef[real_mask] .= [[0.0]] ; IMMCoef = imag.(IMMCoef)
-
-    MMexᴿ = hcat(vcat(RMMex,IMMex),vcat(IMMex,RMMex))
-    MMCoefᴿ = hcat(vcat(RMMCoef,IMMCoef),vcat((-1.0)*IMMCoef,RMMCoef))
-    return MMexᴿ,MMCoefᴿ
+    MMexᴿ = hcat(vcat(ℝexpo,ℂexpo),vcat(ℂexpo,ℝexpo))
+    MMCoefᴿ = hcat(vcat(ℝcoef,ℂcoef),vcat((-1.0)*ℂcoef,ℝcoef))
+    return MMCoefᴿ,MMexᴿ
 end
 
 """"""
@@ -236,11 +227,11 @@ function get_ℂ_block_diag(d,t;noBlock = false)
         return MMexᴿ,MMCoefᴿ
     end
     xx̄yȳMM_blocks = get_xx̄yȳMM_blocks(d,t)
-    γγᶥζζᶥ_δδᶥηηᶥ = get_γγᶥζζᶥ_δδᶥηηᶥ(d,t)
+    γδ_dict = get_γδ_dict(d,t)
 
     MMexᴿ= Dict() ; MMCoefᴿ = Dict()
     for B in keys(xx̄yȳMM_blocks)
-        MMexᴿ[B], MMCoefᴿ[B] = get_ℜℑααᶥββᶥᴿ(d,xx̄yȳMM_blocks[B],γγᶥζζᶥ_δδᶥηηᶥ)
+        MMexᴿ[B], MMCoefᴿ[B] = get_ℜℑααᶥββᶥᴿ(d,xx̄yȳMM_blocks[B],γδ_dict)
     end
     return MMexᴿ,MMCoefᴿ
 end

@@ -20,7 +20,7 @@ module C_constraints
 
     """L([xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜᵀ) ⪰ 0"""
     function make_PSD_con(d,t,Lx;noBlock=false)
-        MMexᴿ,MMCoefᴿ = Moments.get_ℂ_block_diag(d,t;noBlock=noBlock)
+        MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d,t;noBlock=noBlock)
         println(keys(MMexᴿ))
         return  Utils_cons.idx2var_dic(Lx,MMexᴿ,MMCoefᴿ)
     end
