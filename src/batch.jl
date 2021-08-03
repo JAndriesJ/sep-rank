@@ -87,6 +87,11 @@ function unstack_constraints(df,bDir = default_sdir)
 end
 
 
+df = Examples.get_example_meta()
+batch.batch_model(t,Examples.get_examples(),df)
+batch.batch_Computeξₜˢᵉᵖ("C:\\Users\\andries\\all-my-codes\\ju-sep-rank\\assets\\bounds\\")
+nar = batch.unstack_constraints(df)
+
 
 end  # module
 ## Selecting all real examples

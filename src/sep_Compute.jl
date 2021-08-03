@@ -1,26 +1,16 @@
 module sep_Compute
-
-using MosekTools
-using JuMP
-using LinearAlgebra
-
+using MosekTools ; using JuMP
+using LinearAlgebra ; const la = LinearAlgebra
 
 srcDir = dirname(dirname(@__FILE__))*"\\src\\"
-include(srcDir*"Examples\\Examples.jl")
-include(srcDir*"Model\\Utils_Model.jl")
 include(srcDir*"Model\\C_sep_Model.jl")
 include(srcDir*"Model\\R_sep_Model.jl")
-using .Utils_Model
-using .Examples
 using .C_sep_Model
 using .R_sep_Model
 
 export Computeξₜˢᵉᵖ,
        get_sol_vals,
-       get_sol_min_eigval,
-       batch_Computeξₜˢᵉᵖ,
-       quick_run_spec_example
-
+       get_sol_min_eigval
 
 """
 Inpute: Jump model of separability problem.
@@ -37,12 +27,9 @@ function Computeξₜˢᵉᵖ(model)
     println("Objective: ", objective_value(model))
     return model
 end
+Computeξₜˢᵉᵖ(ρ,d,t;con_list ="S∞ sG",noBlock = false) = Computeξₜˢᵉᵖ(C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list,noBlock))
 
-# get_sol_dict(Lx) = Dict(zip(Lx.data,value.(Lx).data))
 get_sol_vals(arr) = JuMP.value.(arr)
-get_sol_min_eigval(arr) = LinearAlgebra.eigmin(JuMP.value.(arr))
-
-
-
+get_sol_min_eigval(arr) = la.eigmin(JuMP.value.(arr))
 
 end

@@ -1,6 +1,6 @@
 module C_constraints
     include(dirname(@__FILE__)*"\\Utils_cons.jl")
-    include(dirname(dirname(@__FILE__))*"\\Moments\\Moments.jl")
+    include(dirname(dirname(@__FILE__))*"\\Moments.jl")
     using .Utils_cons
     using .Moments
     using LinearAlgebra

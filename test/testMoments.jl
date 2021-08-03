@@ -2,7 +2,7 @@ module testMoments
 using Test
 using LinearAlgebra
 
-srcDir = dirname(dirname(@__FILE__))*"\\src\\Moments\\"
+srcDir = dirname(dirname(@__FILE__))*"\\src\\"
 include(srcDir*"Moments.jl")
 import .Moments
 
@@ -11,7 +11,7 @@ const la = LinearAlgebra
 const mom = Moments
 
 @testset "eᵢ" begin
-    n =7
+    n = 7
     for k in 1:n
         e = mom.eᵢ(n,k)
         @test length(e) == n
@@ -70,13 +70,8 @@ end
     @assert length(M_vec) == binomial(n+t,t)
     M_mat =  mom.make_mon_expo(d,(t,t))
     @assert M_vec == M_mat[1,:]
-
 end
 
-@testset "expo_conj" begin
-    @test [mom.expo_conj((2,2), 1:8)] == [[3, 4, 1, 2, 7, 8, 5, 6]]
-    @test [mom.expo_conj((3,3), 1:12)] == [[4, 5, 6, 1, 2, 3, 10, 11, 12, 7, 8, 9]]
-end
 
 @testset "make_mom_expo_keys" begin
     n = 3
@@ -121,10 +116,10 @@ end
     @test sum.(xxᵀtensyyᵀ) == repeat([4],prod(d),prod(d))
 
     for i in 1:5
-    d = rand(2:5,2)
-    xxᵀtensyyᵀ = mom.make_xxᵀ_tens_yyᵀ(d)
-    halfsum(arr) = [sum(arr[1:d[1]]),sum(arr[d[1]+1:end])]
-    @test halfsum.(xxᵀtensyyᵀ) == repeat([[2,2]],prod(d),prod(d))
+        d = rand(2:5,2)
+        xxᵀtensyyᵀ = mom.make_xxᵀ_tens_yyᵀ(d)
+        halfsum(arr) = [sum(arr[1:d[1]]),sum(arr[d[1]+1:end])]
+        @test halfsum.(xxᵀtensyyᵀ) == repeat([[2,2]],prod(d),prod(d))
     end
 end
 

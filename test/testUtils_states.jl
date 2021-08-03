@@ -2,8 +2,8 @@ module testUtils_states
 using Test
 using LinearAlgebra
 
-cd("..") 
-include("src\\Examples\\Utils_states.jl")
+
+include(dirname(dirname(@__FILE__))*"\\src\\Examples\\Utils_states.jl")
 using .Utils_states
 
 

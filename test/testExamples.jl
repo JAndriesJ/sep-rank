@@ -2,7 +2,7 @@ module testExamples
 using LinearAlgebra
 using Test
 
-srcDir = pwd()*"\\src\\Examples\\"
+srcDir = dirname(dirname(@__FILE__))*"\\src\\Examples\\"
 include(srcDir *"Examples_sep.jl")
 include(srcDir *"Examples_ent.jl")
 include(srcDir *"Examples.jl")
@@ -18,11 +18,11 @@ using .Examples
 end
 
 @testset "Test the call example meta data" begin
+    ρ_ex = Examples.get_example()
     df = Examples.get_example_meta()
     @test df[df.Example .== "Eq14Hor97a",:] ==  Examples.get_example_meta("Eq14Hor97a")
-    @test df[df.Example .== "Eq14Hor97a",:] ==  Examples.get_example_meta(1)
+    @test df[df.Example .== "Eq14Hor97a",:].Example[1] ==  Examples.get_example_meta(1).Example
     length(ρ_ex) == size(df)[1]
 end
-
 
 end

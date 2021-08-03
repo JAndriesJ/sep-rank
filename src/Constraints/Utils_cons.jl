@@ -7,7 +7,6 @@ export eᵢ,
        idx2varxx̄ᵀtyȳᵀ,
        get_Gᴿ
 
-
 """The standard basis vector eᵢ in dimension n"""
 eᵢ(n::Int,i::Int) = [j==i for j in 1:n]
 
