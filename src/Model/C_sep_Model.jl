@@ -22,7 +22,7 @@ module C_sep_Model
 ##      PSD Moment matrix blocks
         PSD_con = ccon.make_PSD_con(d,t,Lx;noBlock=noBlock)
         set_con(PSD_con)
-## Fourth order Moment constraints: L(xxᵀ ⊗ yyᵀ) = ρ,
+## Fourth order Moment constraints: L(xxᵀ⊗yyᵀ) = ρ,
         L_xx̄ᵀ_tens_yȳᵀ = ccon.make_ord4_con(d,Lx)
         @constraint(model, L_xx̄ᵀ_tens_yȳᵀ["real"] .== real(ρ))
         @constraint(model, L_xx̄ᵀ_tens_yȳᵀ["imag"] .== imag(ρ))

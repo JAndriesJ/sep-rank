@@ -142,9 +142,15 @@ end
 #                             ααᶥββᶥ[d[1]+1:2*d[1]],
 #                             ααᶥββᶥ[1+2*d[1]:2*d[1]+d[2]],
 #                             ααᶥββᶥ[1+2*d[1]+d[2]:end])
-
+"""ααᶥββᶥ -> α,αᶥ,β,βᶥ"""
 split_expo(ααᶥββᶥ,d₁,d₂) = (ααᶥββᶥ[1:d₁],ααᶥββᶥ[d₁+1:2*d₁],
                             ααᶥββᶥ[1+2*d₁:2*d₁+d₂],ααᶥββᶥ[1+2*d₁+d₂:end])
+
+"""xᵅ̄xᵃyᵝ̄yᵇ -> xᵃx̄ᵅyᵇ̄yᵝ̄"""
+function conj_expo(ααᶥββᶥ,d₁,d₂)
+    α,αᶥ,β,βᶥ = split_expo(ααᶥββᶥ,d₁,d₂)
+    return vcat(αᶥ,α,βᶥ,β)
+end
 
 """Gets the principal block of the moment matrix after block diagonalization"""
 function get_xx̄yȳMM_blocks(d,t)
@@ -157,7 +163,7 @@ function get_xx̄yȳMM_blocks(d,t)
         T = Iᵗ[(r_list .== r) .& (s_list .== s)]
         isempty(T) ? continue : Iᵗ_d[r,s] = T
     end
-    return Dict(zip(keys(Iᵗ_d),[Iᵗ_d[k] .+ reshape(Iᵗ_d[k],1,:) for k in keys(Iᵗ_d)]))
+    return Dict(zip(keys(Iᵗ_d), [Iᵗ_d[k] .+ reshape(map(x->conj_expo(x,d...),Iᵗ_d[k]),1,:) for k in keys(Iᵗ_d)]))
 end
 
 ## The real analogue
@@ -206,7 +212,7 @@ end
 
 function get_ℜℑααᶥββᶥᴿ(d,B,γδ_dict)
     s₁,s₂ = size(B)
-    MM = map(x-> Moments.get_ℜℑααᶥββᶥ(d,x,γδ_dict),B)
+    MM = map(x-> get_ℜℑααᶥββᶥ(d,x,γδ_dict),B)
     MMℝℂ = map(x-> get_ℝℂ_coefexpo(x...),MM)
 
     ℝcoef = [MMℝℂ[i,j][1][1] for i in 1:s₁, j in 1:s₂]
@@ -224,16 +230,16 @@ function get_ℂ_block_diag(d,t;noBlock = false)
     if noBlock
         MMexᴿ = Dict("Default" => map(x->[x],make_mon_expo(d,t)))
         MMCoefᴿ = Dict("Default" => fill([1.0],size(MMexᴿ["Default"])...))
-        return MMexᴿ,MMCoefᴿ
+        return MMCoefᴿ,MMexᴿ
     end
     xx̄yȳMM_blocks = get_xx̄yȳMM_blocks(d,t)
     γδ_dict = get_γδ_dict(d,t)
 
     MMexᴿ= Dict() ; MMCoefᴿ = Dict()
     for B in keys(xx̄yȳMM_blocks)
-        MMexᴿ[B], MMCoefᴿ[B] = get_ℜℑααᶥββᶥᴿ(d,xx̄yȳMM_blocks[B],γδ_dict)
+        MMCoefᴿ[B],MMexᴿ[B] = get_ℜℑααᶥββᶥᴿ(d,xx̄yȳMM_blocks[B],γδ_dict)
     end
-    return MMexᴿ,MMCoefᴿ
+    return MMCoefᴿ,MMexᴿ
 end
 
 

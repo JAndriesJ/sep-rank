@@ -20,8 +20,7 @@ module C_constraints
 
     """L([xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜᵀ) ⪰ 0"""
     function make_PSD_con(d,t,Lx;noBlock=false)
-        MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d,t;noBlock=noBlock)
-        println(keys(MMexᴿ))
+        MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d,t;noBlock=noBlock)
         return  Utils_cons.idx2var_dic(Lx,MMexᴿ,MMCoefᴿ)
     end
 
@@ -38,7 +37,7 @@ module C_constraints
     end
     function make_loc_cons_S_inf(ρ,d,t,Lx;noBlock=false)
         d₁,d₂ = d ; n = sum(2 .*d) ; sqρ   = sqrt(maximum(norm.(ρ)))
-        MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d,t .- 1;noBlock=noBlock)
+        MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d,t .- 1;noBlock=noBlock)
         loc_con = Dict()
         for b in keys(MMCoefᴿ)
             for k in 1:d₁ # Constraint:  Lᴿ( (√ρₘₐₓ-((xᵣₑ)ᵢ²-(xᵢₘ)ᵢ²))⋅ηₜ₋₁)) ⪰ 0 for k ∈ [d₁]
@@ -57,7 +56,7 @@ module C_constraints
     tmp(Lx,B,C,n,s,l) = sum([uc.idx2var_arr(Lx,B,C,[2* uc.eᵢ(n,k)] ) for k in s:(s+l)]) #### SOmething is wrong
     function make_loc_cons_S₂(ρ,d,t,Lx;noBlock=false)
         d₁,d₂ = d ; n = sum(2 .*d) ; sqrt_tr_ρ = sqrt(real(tr(ρ)))
-        MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
+        MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
 
         loc_con = Dict(); g₂ = Dict()
         for b in keys(MMCoefᴿ)
@@ -77,7 +76,7 @@ module C_constraints
         d₁,d₂ = d
         n     = sum(2 .*d)
         # MB     = mom.get_ℂ_block_diag(d,t .- 1)
-        MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
+        MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
         tr_ρ  = real(tr(ρ))
 
         loc_con    = Dict()

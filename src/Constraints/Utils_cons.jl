@@ -16,8 +16,8 @@ Input: Array B of multi-indices: α
 Output: L of x of array of indices: L(x.(B))
  """
 
-idx2var(var,index) = isempty(index) ?  0 : map(α -> var[α],index)
-idx2var(var,index,coef) = sum(coef .* idx2var(var, index))
+idx2var(var,index)        = isempty(index) ?  0 : map(α -> var[α],index)
+idx2var(var,index,coef)   = sum(coef .* idx2var(var, index))
 idx2var(var,index,coef,g) = idx2var(var,g .+ index,coef)
 
 make_gen_aff(arr) = reshape([arr...],size(arr)...)
