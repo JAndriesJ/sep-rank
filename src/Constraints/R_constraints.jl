@@ -23,7 +23,7 @@ module R_constraints
     end
 
     """L(xxᵀ⊗yyᵀ)"""
-    make_ord4_con(d,Lx) = uc.idx2var(Lx,mom.make_xxᵀ_tens_yyᵀ(d))
+    make_ord4_con(d,Lx) = uc.idx2var(Lx,mom.make_xxᵀ⨂yyᵀ(d))
 
     """ L(g⋅η) ⪰ 0 for η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
                         g = √(ρₘₐₓ) - xᵢ² , √(ρₘₐₓ) - yᵢ² and i ∈ [d] """
@@ -84,7 +84,7 @@ module R_constraints
 
     """ ρ⊗L(η) - L( (xxᵀ⊗yyᵀ) ⊗ η ) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of ([x,y]₌ₜ₋₂[x,y]₌ₜ₋₂ᵀ) """
     function make_G_con(ρ,d,t,Lx)
-        MB = mom.get_ℝ_block_diag(d,t.- 2) ; xxᵀ⨂yyᵀ = mom.make_xxᵀ_tens_yyᵀ(d)
+        MB = mom.get_ℝ_block_diag(d,t.- 2) ; xxᵀ⨂yyᵀ = mom.make_xxᵀ⨂yyᵀ(d)
 
         G_con = Dict()
         for b in keys(MB)

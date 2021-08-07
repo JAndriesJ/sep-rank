@@ -24,9 +24,8 @@ module C_constraints
         return  Utils_cons.idx2var_dic(Lx,MMexᴿ,MMCoefᴿ)
     end
 
-
     """L(xx*⊗yy*) ⪰ 0 ⟺ """
-    make_ord4_con(d,Lx) = uc.idx2varxx̄ᵀtyȳᵀ(Lx,mom.make_xx̄ᵀ_tens_yȳᵀ(d))
+    make_ord4_con(d,Lx) = uc.idx2varxx̄ᵀtyȳᵀ(Lx,mom.make_xx̄ᵀ⨂yȳᵀ(d))
 
     """ Lᴿ(gᴿ⋅[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ₋₁[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ₋₁ᵀ) ⪰ 0
         gᴿ = √(ρₘₐₓ) - ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ²) , i ∈ [d_1],
@@ -93,11 +92,9 @@ module C_constraints
     """ρ⊗L(η) - L( (xx*⊗yy*) ⊗ η )⪰ 0 ∀ η ∈ blocks of ([x,̄x,y,̄y]ₜ₋₂[x,̄x,y,̄y]*ₜ₋₂)
      L( ρℝ ⊗ η)  - L( Gℝ[k] ⊗ η)⪰ 0 ∀ η ∈ blocks of [uₓ,vₓ,u_y,v_y]ₜ₋₂[uₓ,vₓ,u_y,v_y]^Tₜ₋₂  """
 
-
-
     function make_Gᴿ_con(ρ,d,t,Lx;noBlock=false)
         n = sum(2 .*d) ; D = prod(d) ; ρᴿ = [real(ρ) -imag(ρ); imag(ρ) real(ρ)]
-        Gᴿ,sm        = uc.get_Gᴿ(mom.make_xx̄ᵀ_tens_yȳᵀ(d)) #
+        Gᴿ,sm        = uc.get_Gᴿ(mom.make_xx̄ᵀ⨂yȳᵀ(d)) #
         MMexᴿ,MMCoefᴿ = mom.get_ℂ_block_diag(d, t.- 2,noBlock=noBlock)
 
         LGℝη         = Dict()

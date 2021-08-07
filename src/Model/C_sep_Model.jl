@@ -23,9 +23,9 @@ module C_sep_Model
         PSD_con = ccon.make_PSD_con(d,t,Lx;noBlock=noBlock)
         set_con(PSD_con)
 ## Fourth order Moment constraints: L(xxᵀ⊗yyᵀ) = ρ,
-        L_xx̄ᵀ_tens_yȳᵀ = ccon.make_ord4_con(d,Lx)
-        @constraint(model, L_xx̄ᵀ_tens_yȳᵀ["real"] .== real(ρ))
-        @constraint(model, L_xx̄ᵀ_tens_yȳᵀ["imag"] .== imag(ρ))
+        L_xx̄ᵀ⨂yȳᵀ = ccon.make_ord4_con(d,Lx)
+        @constraint(model, L_xx̄ᵀ⨂yȳᵀ["real"] .== real(ρ))
+        @constraint(model, L_xx̄ᵀ⨂yȳᵀ["imag"] .== imag(ρ))
 ## Localizing g constraint: L ≥ 0 on M₂ₜ(S)
         if     occursin("S∞",con_list)
             set_con(ccon.make_loc_cons_S_inf(ρ,d,t,Lx;noBlock=noBlock))

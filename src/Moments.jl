@@ -1,19 +1,17 @@
 module Moments
 
-export make_mon_expo,
-       get_ℝ_block_diag,
-       make_xxᵀ_tens_yyᵀ,
-       get_ℂ_block_diag,
-       make_xx̄ᵀ_tens_yȳᵀ,
-       var_kron,
-       var_kron_C,
-       eᵢ,
-       split_expo,
-       get_ℜℑααᶥββᶥᴿ,
-       get_xx̄yȳMM_blocks,
-       get_γδ_dict
-
-
+export  eᵢ,
+        var_kron,
+        var_kron_C,
+        make_mon_expo,
+        make_xxᵀ⨂yyᵀ,
+        get_ℝ_block_diag,
+        make_xx̄ᵀ⨂yȳᵀ,
+        split_expo,
+        get_xx̄yȳMM_blocks,
+        get_γδ_dict,
+        get_ℜBℑB,
+        get_ℂ_block_diag
 
 ## Utils
 """The standard basis vector eᵢ in dimension n"""
@@ -58,7 +56,7 @@ make_mon_expo(d::Tuple{Int,Int},t::Tuple{Int,Int}; isle::Bool = true) = make_mon
 
 ## Real
 """xxᵀ⊗yyᵀ"""
-function make_xxᵀ_tens_yyᵀ(d)
+function make_xxᵀ⨂yyᵀ(d)
     n = sum(d); p_ex = make_mon_expo(n,1;isle = false)
     x, y = p_ex[1:d[1]], p_ex[d[1]+1:n]
     return var_kron(x .+ reshape(x,1,:), y .+ reshape(y,1,:))
@@ -101,17 +99,17 @@ xx*⊗yy* = (xᵣₑ + i xᵢₘ)(xᵣₑ - i xᵢₘ)ᵀ ⊗ (yᵣₑ + i yᵢ�
 = (xᵣₑxᵣₑᵀ + xᵢₘxᵢₘᵀ + i (xᵢₘxᵣₑᵀ - xᵣₑxᵢₘᵀ)) ⊗ (yᵣₑyᵣₑᵀ + yᵢₘyᵢₘᵀ + i (yᵢₘyᵣₑᵀ - yᵣₑyᵢₘᵀ))
 ⟹ ℜe(xx*⊗yy*) = (xᵣₑxᵣₑᵀ + xᵢₘxᵢₘᵀ ) ⊗ (yᵣₑyᵣₑᵀ + yᵢₘyᵢₘᵀ ) - (xᵢₘxᵣₑᵀ - xᵣₑxᵢₘᵀ) ⊗ (yᵢₘyᵣₑᵀ - yᵣₑyᵢₘᵀ)
 ⟹ ℑm(xx*⊗yy*) = (xᵣₑxᵣₑᵀ + xᵢₘxᵢₘᵀ) ⊗ (yᵢₘyᵣₑᵀ - yᵣₑyᵢₘᵀ) + (xᵢₘxᵣₑᵀ - xᵣₑxᵢₘᵀ)⊗(yᵣₑyᵣₑᵀ + yᵢₘyᵢₘᵀ) """
-U(vec,dₐ) = vec .+ reshape(vec,1,dₐ)
-W(vec1,vec2,dₐ) = vec1 .+ reshape(vec2,1,dₐ)
-function make_xx̄ᵀ_tens_yȳᵀ(d)
+U(vec) = vec .+ reshape(vec,1,:)
+W(vec1,vec2) = vec1 .+ reshape(vec2,1,:)
+function make_xx̄ᵀ⨂yȳᵀ(d)
     d₁,d₂ = d
     n = sum(2 .* d)
     pre_expo = make_mon_expo(n,1;isle =false)
     xᵣₑ, xᵢₘ = pre_expo[1:d₁], pre_expo[d₁+1:2*d₁]
     yᵣₑ, yᵢₘ = pre_expo[2*d₁+1:2*d₁+d₂], pre_expo[2*d₁+d₂+1:2*d₁+2*d₂]
 
-    xᵣₑxᵣₑᵀ, xᵢₘxᵢₘᵀ, yᵣₑyᵣₑᵀ, yᵢₘyᵢₘᵀ = U(xᵣₑ,d₁), U(xᵢₘ,d₁), U(yᵣₑ,d₂), U(yᵢₘ,d₂)
-    xᵢₘxᵣₑᵀ, xᵣₑxᵢₘᵀ, yᵢₘyᵣₑᵀ, yᵣₑyᵢₘᵀ = W(xᵢₘ,xᵣₑ,d₁), W(xᵣₑ,xᵢₘ,d₁), W(yᵢₘ,yᵣₑ,d₂), W(yᵣₑ,yᵢₘ,d₂)
+    xᵣₑxᵣₑᵀ, xᵢₘxᵢₘᵀ, yᵣₑyᵣₑᵀ, yᵢₘyᵢₘᵀ = U(xᵣₑ), U(xᵢₘ), U(yᵣₑ), U(yᵢₘ)
+    xᵢₘxᵣₑᵀ, xᵣₑxᵢₘᵀ, yᵢₘyᵣₑᵀ, yᵣₑyᵢₘᵀ = W(xᵢₘ,xᵣₑ), W(xᵣₑ,xᵢₘ), W(yᵢₘ,yᵣₑ), W(yᵣₑ,yᵢₘ)
 
     Real_dict =  Dict(("+ 1")  => var_kron(xᵣₑxᵣₑᵀ,yᵣₑyᵣₑᵀ),
                       ("+ 2")  => var_kron(xᵣₑxᵣₑᵀ,yᵢₘyᵢₘᵀ),
@@ -133,37 +131,37 @@ function make_xx̄ᵀ_tens_yȳᵀ(d)
 
     return Dict("real" => Real_dict,
                 "imag" => Imag_dict)
+
+    # p_ex = make_mon_expo(n,1;isle = false)
+    # x, x̄, y, ȳ = split_expo(p_ex,d...)
+    # B2temp = var_kron(x .+ reshape(x̄,1,:), y .+ reshape(ȳ,1,:))
+    # γδ_dict = mom.get_γδ_dict(d,t)
+    # B2c,B2e = Moments.get_ℜℑααᶥββᶥᴿ(d,B2temp,γδ_dict)
 end
 
 ## Block diagonalization
 # The complex blocks
 """Splits a vector of exponents into the register components ααᶥββᶥ →  (α,αᶥ,β,βᶥ)"""
-# split_expo(ααᶥββᶥ,d) =     (ααᶥββᶥ[1:d[1]],
-#                             ααᶥββᶥ[d[1]+1:2*d[1]],
-#                             ααᶥββᶥ[1+2*d[1]:2*d[1]+d[2]],
-#                             ααᶥββᶥ[1+2*d[1]+d[2]:end])
-"""ααᶥββᶥ -> α,αᶥ,β,βᶥ"""
 split_expo(ααᶥββᶥ,d₁,d₂) = (ααᶥββᶥ[1:d₁],ααᶥββᶥ[d₁+1:2*d₁],
                             ααᶥββᶥ[1+2*d₁:2*d₁+d₂],ααᶥββᶥ[1+2*d₁+d₂:end])
 
 """xᵅ̄xᵃyᵝ̄yᵇ -> xᵃx̄ᵅyᵇ̄yᵝ̄"""
 function conj_expo(ααᶥββᶥ,d₁,d₂)
-    α,αᶥ,β,βᶥ = split_expo(ααᶥββᶥ,d₁,d₂)
-    return vcat(αᶥ,α,βᶥ,β)
+    α,αᶥ,β,βᶥ = split_expo(ααᶥββᶥ,d₁,d₂) ; return vcat(αᶥ,α,βᶥ,β)
 end
 
 """Gets the principal block of the moment matrix after block diagonalization"""
 function get_xx̄yȳMM_blocks(d,t)
     Iᵗ = make_mon_expo(d,t[1])
-    Iᵗ_temp = map(x ->  sum.(split_expo(x,d...)),Iᵗ)
+    Iᵗ_temp = map(x ->  sum.(split_expo(x,d...)), Iᵗ)
     r_list  = map(v -> v[1]-v[2],Iᵗ_temp) ; s_list  = map(v -> v[3]-v[4],Iᵗ_temp)
-
-    Iᵗ_d = Dict()
+    P = Dict()
     for r ∈ -t[1]:t[1], s ∈ -t[1]:t[1]
         T = Iᵗ[(r_list .== r) .& (s_list .== s)]
-        isempty(T) ? continue : Iᵗ_d[r,s] = T
+        isempty(T) ? nothing : P[r,s] = T
     end
-    return Dict(zip(keys(Iᵗ_d), [Iᵗ_d[k] .+ reshape(map(x->conj_expo(x,d...),Iᵗ_d[k]),1,:) for k in keys(Iᵗ_d)]))
+    build_block(k) = P[k] .+ reshape(map(x->conj_expo(x,d...),P[k]),1,:)
+    Dict(zip(keys(P), [build_block(k) for k in keys(P)]))
 end
 
 ## The real analogue
@@ -171,7 +169,7 @@ end
 (γ,γᶥ,ζ,ζᶥ)+(δ,δᶥ,η,ηᶥ)=(α,αᶥ,β,βᶥ)  ∀  ααᶥββᶥ ∈ Moment matrixₜ
 """
 function get_γδ_dict(d,t)
-    M = Moments.make_mon_expo(d,t)
+    M = Moments.make_mon_expo(d,2 .* t)
     M_vec = M[:,1]
     γδ_dict = Dict()
     for k in Moments.make_mon_expo(d,2*t[1])
@@ -181,7 +179,11 @@ function get_γδ_dict(d,t)
     return γδ_dict
 end
 
-"""The coefficients function"""
+"""The coefficients function
+-1^|δᶥ+ηᶥ|
+i^|δ+δᶥ+η+ηᶥ|
+α!αᶥ!β!βᶥ! / γ!γᶥ!ζ!ζᶥ!δ!δᶥ!η!ηᶥ!
+"""
 f_temp(X) = prod(map(x-> prod(factorial.(x)),X))
 function get_coef(p1,p2,d)
     γ,γᶥ,ζ,ζᶥ = Moments.split_expo(p1,d...) ; δ,δᶥ,η,ηᶥ = Moments.split_expo(p2,d...)
@@ -219,11 +221,11 @@ function get_ℜℑααᶥββᶥᴿ(d,B,γδ_dict)
     ℝexpo = [MMℝℂ[i,j][1][2] for i in 1:s₁, j in 1:s₂]
     ℂcoef = [MMℝℂ[i,j][2][1] for i in 1:s₁, j in 1:s₂]
     ℂexpo = [MMℝℂ[i,j][2][2] for i in 1:s₁, j in 1:s₂]
-
-    MMexᴿ = hcat(vcat(ℝexpo,ℂexpo),vcat(ℂexpo,ℝexpo))
     MMCoefᴿ = hcat(vcat(ℝcoef,ℂcoef),vcat((-1.0)*ℂcoef,ℝcoef))
+    MMexᴿ   = hcat(vcat(ℝexpo,ℂexpo),vcat(ℂexpo,ℝexpo))
     return MMCoefᴿ,MMexᴿ
 end
+
 
 """"""
 function get_ℂ_block_diag(d,t;noBlock = false)
@@ -241,9 +243,6 @@ function get_ℂ_block_diag(d,t;noBlock = false)
     end
     return MMCoefᴿ,MMexᴿ
 end
-
-
-
 
 
 end

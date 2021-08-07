@@ -29,10 +29,10 @@ function Computeξₜˢᵉᵖ(model)
 end
 Computeξₜˢᵉᵖ(ρ,d,t;con_list ="S∞ sG",noBlock = false,isRe = false) = isRe ?
     Computeξₜˢᵉᵖ(R_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list)) :
-    Computeξₜˢᵉᵖ(C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list,noBlock)) 
+    Computeξₜˢᵉᵖ(C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list,noBlock))
 
 
 get_sol_vals(arr) = JuMP.value.(arr)
-get_sol_min_eigval(arr) = la.eigmin(JuMP.value.(arr))
+get_sol_min_eigval(arr) = la.eigmin(get_sol_vals(arr))
 
 end
