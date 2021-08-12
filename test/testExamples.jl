@@ -25,4 +25,32 @@ end
     length(ρ_ex) == size(df)[1]
 end
 
+##
+df = ex.get_example_meta()
+entdf = df[df.isSeparable .== "ent",:]
+ρ_dict = ex.get_example()
+
+for n_ex in 1:23
+    exa = entdf.Example[n_ex]
+    ρ = ρ_dict[exa]
+    d = entdf.Size[n_ex]
+    println("$(entdf.Example[n_ex]) $(la.eigmin(ρ))")
+    @assert us.isPPᵀ(ρ,d) == entdf.hasPPᵀ[n_ex]
+end
+
+##
+df = ex.get_example_meta()
+sepdf = df[df.isSeparable .== "sep",:]
+ρ_dict = ex.get_example()
+
+for n_ex in 1:36
+    exa = sepdf.Example[n_ex]
+    ρ = ρ_dict[exa]
+    d = sepdf.Size[n_ex]
+    println("$(sepdf.Example[n_ex]) $(la.eigvals(ρ)[1])")
+    @assert us.isPPᵀ(ρ,d) == sepdf.hasPPᵀ[n_ex]
+end
+
+
+
 end

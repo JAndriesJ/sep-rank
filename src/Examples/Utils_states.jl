@@ -7,7 +7,7 @@ export maketraceone,
        ψ,
        sq,
        psep
-       # makediagone,
+
 
 """ Returns the partial transpose of the sysemt. """
 function take_Pᵀ(ρ,sys,d)

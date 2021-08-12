@@ -16,14 +16,14 @@ using JuMP
 export batch_model
 default_sdir = dirname(dirname(@__FILE__))*"\\assets\\bounds\\"
 """ Produces models for a set of constraints."""
-function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S∞sG","S₂sG","S₂₁sG"])
+function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S∞sG","S₂sG","SᵦₐₗₗsG"])
     for ex in keys(ρdic)
         ρ = ρdic[ex]
         d = filter(:Example => ==(ex),df).Size[1]
         for con ∈  con_list, isR ∈ ['R', 'C']
             (!filter(:Example => ==(ex),df).isReal[1] && (isR == 'R')) ? continue : 0
             println("Currently $isR-modeling example $ex with constraints $con")
-            sep_mod = (isR == 'R') ? R_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con) : C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con,noBlock = true)
+            sep_mod = (isR == 'R') ? R_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con) : C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con,noBlock = false)
 
             Utils_Model.export_model(sep_mod, sdir*"$(ex)_$(con)_$(isR)_$t.dat-s")
         end
@@ -68,29 +68,31 @@ using CSV
 using DataFrames
 
 function unstack_constraints(df,bDir = default_sdir)
-    temp_df  = CSV.read("C:\\Users\\andries\\all-my-codes\\ju-sep-rank\\assets\\bounds\\"*"Summary.csv", DataFrame)
+    temp_df  = CSV.read("C:\\Users\\andries\\all-my-codes\\sep-rank\\assets\\bounds\\"*"Summary.csv", DataFrame)
     temp2_df = select(innerjoin(df, temp_df, on = :Example),[:Example,:isReal,:isSeparable,:Model,:Size,:Bi_rank,:Constraint,:obj_val])
     temp4_df = unstack(temp2_df, :Model, :obj_val)
 
     temp4R_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:R])
     temp4Rus_df = unstack(temp4R_df, :Constraint, :R)
-    rename!(temp4Rus_df,Dict(:S₂sG => :RS₂sG, :S₂₁sG => :RS₂₁sG, :S∞sG=>:RS∞sG));
+    rename!(temp4Rus_df,Dict(:S₂sG => :RS₂sG, :SᵦₐₗₗsG => :RSᵦₐₗₗsG, :S∞sG=>:RS∞sG));
 
     temp4C_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:C])
     temp4Cus_df = unstack(temp4C_df, :Constraint, :C)
-    rename!(temp4Cus_df,Dict(:S₂sG => :CS₂sG, :S₂₁sG => :CS₂₁sG, :S∞sG=>:CS∞sG));
+    rename!(temp4Cus_df,Dict(:S₂sG => :CS₂sG, :SᵦₐₗₗsG => :CSᵦₐₗₗsG, :S∞sG=>:CS∞sG));
 
-    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example,:RS₂sG, :RS₂₁sG, :RS∞sG]), on = :Example)
+    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example,:RS₂sG, :RSᵦₐₗₗsG, :RS∞sG]), on = :Example)
 
     CSV.write(bDir*"SummaryUnstacked.csv", temp5_df, delim="&")
+    qwweqr = DataFrames.select(temp5_df,[:Example,:Size,:Bi_rank,:CSᵦₐₗₗsG, :CS₂sG, :CS∞sG, :RSᵦₐₗₗsG, :RS₂sG, :RS∞sG,:isSeparable])
+    CSV.write(bDir*"t=__.csv", qwweqr, delim="&")
     return temp5_df
 end
 
+# df = Examples.get_example_meta()
+# batch.batch_model(t,Examples.get_examples(),df)
+# batch.batch_Computeξₜˢᵉᵖ("C:\\Users\\andries\\all-my-codes\\ju-sep-rank\\assets\\bounds\\")
+# nar = batch.unstack_constraints(df)
 
-df = Examples.get_example_meta()
-batch.batch_model(t,Examples.get_examples(),df)
-batch.batch_Computeξₜˢᵉᵖ("C:\\Users\\andries\\all-my-codes\\ju-sep-rank\\assets\\bounds\\")
-nar = batch.unstack_constraints(df)
 
 
 end  # module

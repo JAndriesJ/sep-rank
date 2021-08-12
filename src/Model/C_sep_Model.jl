@@ -11,7 +11,7 @@ module C_sep_Model
     """The model"""
     function Modelξₜˢᵉᵖ(ρ,d,t;con_list ="S∞ sG",noBlock = false)
         model = JuMP.Model()
-        @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1])] )## Create variables
+        @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1])])## Create variables
         function set_con(c)
             for k in keys(c)
                  size(c[k]) == (1, 1) ?
@@ -23,9 +23,9 @@ module C_sep_Model
         PSD_con = ccon.make_PSD_con(d,t,Lx;noBlock=noBlock)
         set_con(PSD_con)
 ## Fourth order Moment constraints: L(xxᵀ⊗yyᵀ) = ρ,
-        L_xx̄ᵀ⨂yȳᵀ = ccon.make_ord4_con(d,Lx)
-        @constraint(model, L_xx̄ᵀ⨂yȳᵀ["real"] .== real(ρ))
-        @constraint(model, L_xx̄ᵀ⨂yȳᵀ["imag"] .== imag(ρ))
+        Lᴿ_ℝxx̄ᵀ⨂yȳᵀ,Lᴿ_𝕀xx̄ᵀ⨂yȳᵀ = ccon.make_ord4_con(d,Lx)
+        @constraint(model, Lᴿ_ℝxx̄ᵀ⨂yȳᵀ .== real(ρ))
+        @constraint(model, Lᴿ_𝕀xx̄ᵀ⨂yȳᵀ .== imag(ρ))
 ## Localizing g constraint: L ≥ 0 on M₂ₜ(S)
         if     occursin("S∞",con_list)
             set_con(ccon.make_loc_cons_S_inf(ρ,d,t,Lx;noBlock=noBlock))
@@ -35,7 +35,7 @@ module C_sep_Model
                 @constraint(model, loc_con_eq[k] .==  zeros(size(loc_con_eq[k])))
             end
             set_con(loc_con)
-        elseif occursin("S₂₁",con_list)
+        elseif occursin("Sᵦₐₗₗ",con_list)
             loc_con, loc_con_eq  = ccon.make_loc_cons_S₂₁(ρ,d,t,Lx)
             for k in keys(loc_con_eq)
                 @constraint(model, loc_con_eq[k] .==  zeros(size(loc_con_eq[k])))
@@ -48,7 +48,7 @@ module C_sep_Model
             set_con(ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=noBlock))
         end
         #  Set objective
-        @objective(model, Min, Lx[zeros(sum(2 .* d))])
+        @objective(model, Min, Lx[zeros(Int64,sum(2 .* d))])
         return model
     end
 end

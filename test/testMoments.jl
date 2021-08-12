@@ -128,15 +128,28 @@ end
 
 ## Complex
 
-@testset "make_xx̄ᵀ_tens_yȳᵀ" begin
+@testset "make_xxᵀ⨂yyᵀ" begin
     d = rand(2:5,2)
-    xx̄ᵀ_tens_yȳᵀ = mom.make_xx̄ᵀ_tens_yȳᵀ(d)
+    xx̄ᵀ_tens_yȳᵀ = mom.make_xxᵀ⨂yyᵀ(d)
 end
 
 @test mom.split_expo([1,1,1,2,2,2,3,3,3,4,4,4],3,3) == ([1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4])
 
-
 @testset "get_xx̄yȳMM_blocks" begin
+    d = (2,2) ; t = (2,2)
+    Iᵗ = make_mon_expo(d,t[1])
+    Iᵗ_temp = map(x ->  sum.(split_expo(x,d...)),Iᵗ)
+    r_list  = map(v -> v[1]-v[2],Iᵗ_temp) ; s_list  = map(v -> v[3]-v[4],Iᵗ_temp)
+
+    Iᵗ_d = Dict()
+    for r ∈ -t[1]:t[1], s ∈ -t[1]:t[1]
+        T = Iᵗ[(r_list .== r) .& (s_list .== s)]
+        isempty(T) ? continue : Iᵗ_d[r,s] = T
+    end
+    nar = [i  for k in keys(Iᵗ_d) for i in Iᵗ_d[k]]
+    @test sort(nar) == sort(Iᵗ)
+
+
     d₁ = rand(2:4); t₁ = rand(2:4)
     d = (d₁,d₁) ; t = (t₁,t₁)
     xx̄yȳMM_blocks = mom.get_xx̄yȳMM_blocks(d,t)
@@ -146,47 +159,38 @@ end
 
         @test length(unique(rp)) == 1
         @test length(unique(sp)) == 1
-        @test (rp[1,1],sp[1,1]) .÷ 2 == b
+        @test (rp[1,1],sp[1,1]) == (0,0)
+    end
+end
+
+@testset "get_γδ_dict" begin
+    d₁ = rand(2:3); t₁ = rand(2:3)
+    d = (d₁,d₁) ; t = (t₁,t₁)
+    γδ_dict = Moments.get_γδ_dict(d,t)
+    for α ∈ keys(γδ_dict)
+        γ,δ = γδ_dict[α]
+        @test length(unique(γ+δ)) == 1
+        @test unique(γ+δ)[1] == α
     end
 end
 
 
+@testset "get_coef" begin
+
+end
+
+@testset "get_expo" begin
+end
+
+@testset "get_ℜℑααᶥββᶥ" begin
+end
+
+@testset "get_ℝℂ_coefexpo" begin
+end
+
 
 @testset "get_ℂ_block_diagᵀ" begin
 
-for b in keys(xx̄yȳMM_blocks)
-    B = xx̄yȳMM_blocks[b]
-
-    split_expo(ααᶥββᶥ,d) =     (ααᶥββᶥ[1:d[1]],
-                                ααᶥββᶥ[d[1]+1:2*d[1]],
-                                ααᶥββᶥ[1+2*d[1]:2*d[1]+d[2]],
-                                ααᶥββᶥ[1+2*d[1]+d[2]:end])
-
-    Iᵗ_temp = map(x ->  sum.(split_expo(x,d)),B)
-    map(x ->  split_expo(x,d),B)
-    r_list  = map(v -> v[1]-v[2],Iᵗ_temp) ; s_list  = map(v -> v[3]-v[4],Iᵗ_temp)
-    @test (unique([r_list...])...,unique([s_list...])...) == b .* 2
-end
-
-pf(x) = prod(factorial.(x))
-
-γ,γᶥ,δ,δᶥ = split_expo([2,0,0,0,0,0,1,0,0,0,0,0],(3,3))
-η,ηᶥ,ζ,ζᶥ = split_expo([0,0,0,0,0,0,2,0,0,0,0,0],(3,3))
-a = ((-1)^sum(δᶥ + ζᶥ) * (im)^sum(δ+δᶥ+ζ+ζᶥ))* pf(γ + δ) * pf(γᶥ + δᶥ) * pf(η + ζ) * pf(ηᶥ + ζᶥ)
-b = pf(γ)*pf(γᶥ)*pf(δ)*pf(δᶥ)*pf(η)*pf(ηᶥ)*pf(ζ)*pf(ζᶥ)
-
-
-t = (2,2)
-d = (2,2)
-xx̄yȳMM_blocks = Moments.get_xx̄yȳMM_blocks(d,t)
-MM = Moments.make_mon_expo(d,t)
-size(MM)[1] == sum([size(xx̄yȳMM_blocks[b])[1] for b in [keys(xx̄yȳMM_blocks)...]])
-
-γγᶥδδᶥζζᶥηηᶥ = Moments.get_γγᶥδδᶥζζᶥηηᶥ(d,t)
-@assert size([keys(γγᶥδδᶥζζᶥηηᶥ)...])[1] == size(Moments.make_mon_expo(d,2*t[1]))[1]
-for b in [keys(γγᶥδδᶥζζᶥηηᶥ)...]
-    @assert [b] == unique(γγᶥδδᶥζζᶥηηᶥ[b][1] .+ γγᶥδδᶥζζᶥηηᶥ[b][2])
-end
 
 end
 

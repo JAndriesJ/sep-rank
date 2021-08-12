@@ -54,7 +54,7 @@ module R_sep_Model
             set_con(rcon.make_G_con(ρ,d,t,Lx)) # L((ρ-xxᵀ⊗yyᵀ)⊗([x,y]ₜ₋₂[x,y]ᵀₜ₋₂))
         end
 
-        @objective(model, Min, Lx[zeros(sum(d))]) #  Set objective
+        @objective(model, Min, Lx[zeros(Int64,sum(d))]) #  Set objective
         return model
     end
 end

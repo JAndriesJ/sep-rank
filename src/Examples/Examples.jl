@@ -25,6 +25,7 @@ siz_dic = Dict(  4 => (2,2),
                  6 => (2,3),
                  8 => (2,4),
                  9 => (3,3),
+                 10 => (2,5),
                  16 => (4,4))
 
 """Returns a DataFrame object containing the"""
@@ -49,11 +50,11 @@ function get_example_meta(isWrite = false)
 end
 #
 get_example_meta(ex::Int) = get_example_meta()[ex,:]
-function get_example_meta(ex::String) 
+function get_example_meta(ex::String)
     df = get_example_meta()
     return df[df.Example .== ex,:]
-end   
-    
+end
+
 
 
 end
