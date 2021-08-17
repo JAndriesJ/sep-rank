@@ -7,9 +7,9 @@ module R_constraints
     export make_mon_expo_keys,
            make_PSD_con,
            make_ord4_con,
-           make_loc_cons_S_inf,
-           make_loc_cons_S₂,
-           make_loc_cons_S₂₁,
+           make_loc_cons_S1,
+           make_loc_cons_S2,
+           make_loc_cons_S3,
            make_G_con
 
     make_mon_expo_keys(n,t::Int) = Moments.make_mon_expo(n,t*2)
@@ -33,7 +33,7 @@ module R_constraints
         return  Lρ - Lxᵢ
     end
 
-    function make_loc_cons_S_inf(ρ,d,t,Lx)
+    function make_loc_cons_S1(ρ,d,t,Lx)
         n     = sum(d)
         MB    = mom.get_ℝ_block_diag(d,t.- 1)
         sqr_ρ = sqrt(maximum(ρ))
@@ -52,7 +52,7 @@ module R_constraints
 
     """L(g⋅η) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
                        g = √(Tr(ρ)) - ∑xᵢ² , √(Tr(ρ)) - ∑yᵢ² """
-    function make_loc_cons_S₂(ρ,d,t,Lx)
+    function make_loc_cons_S2(ρ,d,t,Lx)
         d₁,d₂ = d ; n = sum(d) ; stρ = sqrt(sum([ρ[i,i] for i in 1:n]))
         MB = mom.get_ℝ_block_diag(d,t.- 1)
         loc_con = Dict() ; g₂ = Dict()
@@ -68,7 +68,7 @@ module R_constraints
 
     """ L((Tr(ρ) - ∑xᵢ²)⋅η) ⪰ 0 ∀ η ∈ "even-degree"-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
         L((∑yᵢ² - 1)⋅η) = 0 """
-    function make_loc_cons_S₂₁(ρ,d,t,Lx)
+    function make_loc_cons_S3(ρ,d,t,Lx)
         d₁,d₂ = d ; n = sum(d) ; trρ = sum([ρ[i,i] for i in 1:size(ρ)[1]])
         MB    = mom.get_ℝ_block_diag(d,t.- 1)
         loc_con = Dict() ; g₂ = Dict()

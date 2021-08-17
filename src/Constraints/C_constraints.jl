@@ -11,9 +11,9 @@ module C_constraints
     export make_mon_expo_keys,
            make_PSD_con,
            make_ord4_con,
-           make_loc_cons_S_inf,
-           make_loc_cons_S₂,
-           make_loc_cons_S₂₁,
+           make_loc_cons_S1,
+           make_loc_cons_S2,
+           make_loc_cons_S3,
            make_Gᴿ_con
 
     make_mon_expo_keys(d,t::Int) = mom.make_mon_expo(d,t*2)
@@ -38,7 +38,7 @@ module C_constraints
         gᴿ = √(ρₘₐₓ) - ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ²) , i ∈ [d_1],
         or   √(ρₘₐₓ) - ((yᵣₑ)ⱼ² + (yᵢₘ)ⱼ²) , j ∈ [d_2] """
     make_loc_con(Lx,sqρ,eᵤ,eᵥ,B,C) = sqρ*uc.idx2var_a(Lx,B,C) - (uc.idx2var_a(Lx,B,C,[2*eᵤ]) + uc.idx2var_a(Lx,B,C,[2*eᵥ]))  # L((√ρₘₐₓ - ((xᵣₑ)ᵢ²+(xᵢₘ)ᵢ²))⋅ηₜ₋₁)
-    function make_loc_cons_S_inf(ρ,d,t,Lx;noBlock=false)
+    function make_loc_cons_S1(ρ,d,t,Lx;noBlock=false)
         d₁,d₂ = d ; n = sum(2 .*d) ; sqρ   = sqrt(maximum(norm.(ρ)))
         MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d,t .- 1;noBlock=noBlock)
         loc_con = Dict()
@@ -57,7 +57,7 @@ module C_constraints
         gᴿ   = √Tr(ρ) - ∑ᵈᵢ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ²),
                 ∑ᵈᵢ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ²) - ∑ᵈᵢ((yᵣₑ)ᵢ² + (yᵢₘ)ᵢ²)"""
     tmp(Lx,ind,coef,n,s,l) = sum([uc.idx2var_a(Lx,ind,coef,[2* uc.eᵢ(n,k)]) for k in s:l]) #### SOmething is wrong
-    function make_loc_cons_S₂(ρ,d,t,Lx;noBlock=false)
+    function make_loc_cons_S2(ρ,d,t,Lx;noBlock=false)
         d₁,d₂ = d ; n = sum(2 .*d) ; stρ = sqrt(real(tr(ρ)))
         MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
 
@@ -76,7 +76,7 @@ module C_constraints
     """Lᴿ(gᴿ⋅[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ₋₁[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ₋₁ᵀ) ⪰ 0
         gᴿ = Tr(ρ) - ∑ᵈᵢ(uₓᵢ² + vₓᵢ²),
                 ∑ᵈᵢ(u_yⱼ² + v_yⱼ²)  - 1"""
-    function make_loc_cons_S₂₁(ρ,d,t,Lx;noBlock=false)
+    function make_loc_cons_S3(ρ,d,t,Lx;noBlock=false)
         d₁,d₂ = d ; n = sum(2 .*d) ; tr_ρ  = real(tr(ρ))
         MMCoefᴿ,MMexᴿ = mom.get_ℂ_block_diag(d, t.- 1,noBlock=noBlock)
         loc_con    = Dict() ; loc_con_eq = Dict()

@@ -16,7 +16,7 @@ using JuMP
 export batch_model
 default_sdir = dirname(dirname(@__FILE__))*"\\assets\\bounds\\"
 """ Produces models for a set of constraints."""
-function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S∞sG","S₂sG","SᵦₐₗₗsG"])
+function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S1sG","S2sG","S3sG"])
     for ex in keys(ρdic)
         ρ = ρdic[ex]
         d = filter(:Example => ==(ex),df).Size[1]
@@ -74,16 +74,16 @@ function unstack_constraints(df,bDir = default_sdir)
 
     temp4R_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:R])
     temp4Rus_df = unstack(temp4R_df, :Constraint, :R)
-    rename!(temp4Rus_df,Dict(:S₂sG => :RS₂sG, :SᵦₐₗₗsG => :RSᵦₐₗₗsG, :S∞sG=>:RS∞sG));
+    rename!(temp4Rus_df,Dict(:S1sG=>:RS1sG, :S2sG => :RS2sG, :S3sG => :RS3sG));
 
     temp4C_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:C])
     temp4Cus_df = unstack(temp4C_df, :Constraint, :C)
-    rename!(temp4Cus_df,Dict(:S₂sG => :CS₂sG, :SᵦₐₗₗsG => :CSᵦₐₗₗsG, :S∞sG=>:CS∞sG));
+    rename!(temp4Cus_df,Dict(:S1sG=>:CS1sG, :S2sG => :CS2sG, :S3sG => :CS3sG));
 
-    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example,:RS₂sG, :RSᵦₐₗₗsG, :RS∞sG]), on = :Example)
+    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example ,:RS1sG, :RS2sG, :RS3sG]), on = :Example)
 
     CSV.write(bDir*"SummaryUnstacked.csv", temp5_df, delim="&")
-    qwweqr = DataFrames.select(temp5_df,[:Example,:Size,:Bi_rank,:CSᵦₐₗₗsG, :CS₂sG, :CS∞sG, :RSᵦₐₗₗsG, :RS₂sG, :RS∞sG,:isSeparable])
+    qwweqr = DataFrames.select(temp5_df,[:Example,:Size,:Bi_rank,:CS1sG, :CS2sG, :CS3sG, :RS1sG, :RS2sG, :RS3sG, :isSeparable])
     CSV.write(bDir*"t=__.csv", qwweqr, delim="&")
     return temp5_df
 end

@@ -45,7 +45,7 @@
        0. 0. 0. 0.
        0. 0. 0. 1.]
 d = (2,2)
-t = (2,2) ; cl = "S∞sG"  #"S∞ S₂ Sᵦₐₗₗ sG"
+t = (3,3) ; cl = "S1sG"  #"S∞ S₂ Sᵦₐₗₗ sG"
 
 # t = (3,3)
 
@@ -58,8 +58,7 @@ d = ex1_m.Size[1]
 ℂ_sep_mod  = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list=cl,noBlock=true)
 ##  Size check
 t = (3,3)
-
-exa = "RRdv"
+exa = "RCai"
 ex1_m = ex.get_example_meta(exa)
 d = ex1_m.Size[1]
 ρ = ex.get_example(exa)
@@ -67,23 +66,52 @@ d = ex1_m.Size[1]
 model = JuMP.Model()
 @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1])])## Create variables
 
+##  blocks
 Gᴿ_con = ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=false)
-
 for b in keys(Gᴿ_con)
     println(size(Gᴿ_con[b]))
 end
 
-γδ_dict = mom.get_γδ_dict(d,(2,2))
-xx̄ᵀ⨂yȳᵀ = Moments.make_xx̄ᵀ⨂yȳᵀ(d,γδ_dict)
-c_xx̄ᵀ⨂yȳᵀᴿ,e_xx̄ᵀ⨂yȳᵀᴿ = mom.get_coef_expoᴿ(d,xx̄ᵀ⨂yȳᵀ,γδ_dict)
-MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, t.- 2,noBlock=false)
+loc_cons_S1 = ccon.make_loc_cons_S1(ρ,d,t,Lx;noBlock=false)
+for b in keys(loc_cons_S1)
+    contains(b[2],"x²") ? println(b[1],size(loc_cons_S1[b])) : nothing
+end
 
-for b in keys(Gᴿ_con)
+[keys(loc_cons_S1)...]
+
+
+MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, t,noBlock=false)
+
+for b in keys(MMᴿcoef)
     println(size(MMᴿcoef[b]))
 end
 
 
-G_con = rcon.make_G_con(ρ,d,t,Lx)
+
+## No blocks
+
+Gᴿ_con = ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=true)
+for b in keys(Gᴿ_con)
+    println(size(Gᴿ_con[b]))
+end
+
+loc_cons_S1 = ccon.make_loc_cons_S1(ρ,d,t,Lx;noBlock=true)
+for b in keys(loc_cons_S1)
+    contains(b[2],"x²") ? println(b[1],size(loc_cons_S1[b])) : nothing
+end
+
+[keys(loc_cons_S1)...]
+
+
+MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, t,noBlock=true)
+
+for b in keys(MMᴿcoef)
+    println(size(MMᴿcoef[b]))
+end
+
+
+
+
 
 ## Batch run
 include(srcDir*"batch.jl")
@@ -91,7 +119,7 @@ using .batch
 
 df     = ex.get_example_meta()
 ρ_dict = ex.get_example()
-t      = (3,3)
+t      = (2,2)
 batch.batch_model(t,ρ_dict,df)
 batch.batch_Computeξₜˢᵉᵖ("C:\\Users\\andries\\all-my-codes\\sep-rank\\assets\\bounds\\")
 nar = batch.unstack_constraints(df)
