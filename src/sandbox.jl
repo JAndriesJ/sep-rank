@@ -23,7 +23,6 @@
     include(srcDir*"Model\\C_sep_Model.jl")
     include(srcDir*"sep_Compute.jl")
 
-    using .sep_Compute
     using .Examples ; const ex = Examples
     using .Utils_states ; const us = Utils_states
     using .Moments ; const mom = Moments
