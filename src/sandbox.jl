@@ -69,24 +69,26 @@ model = JuMP.Model()
 ##  blocks
 Gᴿ_con = ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=false)
 for b in keys(Gᴿ_con)
-    println(size(Gᴿ_con[b]))
+    prod(size(Gᴿ_con[b]))
 end
+ADSA1 = sum([prod(size(Gᴿ_con[b])) for b in keys(Gᴿ_con)])
+
 
 loc_cons_S1 = ccon.make_loc_cons_S1(ρ,d,t,Lx;noBlock=false)
 for b in keys(loc_cons_S1)
     contains(b[2],"x²") ? println(b[1],size(loc_cons_S1[b])) : nothing
 end
+ADSA2 = sum([contains(b[2],"x²") ? prod(size(loc_cons_S1[b])) : 0 for b in keys(loc_cons_S1)])
 
-[keys(loc_cons_S1)...]
 
 
 MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, t,noBlock=false)
-
 for b in keys(MMᴿcoef)
     println(size(MMᴿcoef[b]))
 end
+ADSA3 = sum([prod(size(MMᴿcoef[b])) for b in keys(MMᴿcoef)])
 
-
+ADSA1 + ADSA2 + ADSA3
 
 ## No blocks
 
@@ -94,22 +96,23 @@ Gᴿ_con = ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=true)
 for b in keys(Gᴿ_con)
     println(size(Gᴿ_con[b]))
 end
+ADSA1 = sum([prod(size(Gᴿ_con[b])) for b in keys(Gᴿ_con)])
 
 loc_cons_S1 = ccon.make_loc_cons_S1(ρ,d,t,Lx;noBlock=true)
 for b in keys(loc_cons_S1)
     contains(b[2],"x²") ? println(b[1],size(loc_cons_S1[b])) : nothing
 end
+ADSA2 = sum([contains(b[2],"x²") ? prod(size(loc_cons_S1[b])) : 0 for b in keys(loc_cons_S1)])
 
-[keys(loc_cons_S1)...]
 
 
 MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, t,noBlock=true)
-
 for b in keys(MMᴿcoef)
     println(size(MMᴿcoef[b]))
 end
+ADSA3 = sum([prod(size(MMᴿcoef[b])) for b in keys(MMᴿcoef)])
 
-
+ADSA1 + ADSA2 + ADSA3   
 
 
 

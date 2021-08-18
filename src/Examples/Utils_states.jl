@@ -1,13 +1,17 @@
 module Utils_states
 using LinearAlgebra
 
-export maketraceone,
+export eᵢ,
+       maketraceone,
        take_Pᵀ,
        isPPᵀ,
        ψ,
        sq,
        psep
 
+
+"""The standard basis vector eᵢ in dimension n"""
+eᵢ(n::Int,i::Int) = [Int(j==i) for j in 1:n]
 
 """ Returns the partial transpose of the sysemt. """
 function take_Pᵀ(ρ,sys,d)
@@ -51,7 +55,7 @@ maketraceone(ρ) = ρ/tr(ρ)
 eᵢ(n::Int,i::Int) = [j==i for j in 1:n] #"""The standard basis vector eᵢ in dimension n"""
 ψ(i₀::Int,i₁::Int,n::Int) = kron(eᵢ(n,i₀),eᵢ(n,i₁))
 ψ(n::Int) = kron(eᵢ(n,1) + eᵢ(n,2),eᵢ(n,1) + eᵢ(n,2))
-sq(ϕ) = ϕ*transpose(conj(ϕ))
+sq(ϕ) =  ϕ*transpose(conj.(ϕ))
 psep(i₀::Int,i₁::Int,n::Int) = sq(ψ(i₀,i₁,n))
-
+# all(isreal.(ϕ)) ? ϕ*transpose(ϕ) :
 end
