@@ -4,7 +4,7 @@ using Random
 
 srcDir = dirname(@__FILE__)*"\\"
 include(srcDir *"Utils_states.jl")
-using .Utils_states
+using .Utils_states ; const us = Utils_states
 
 export get_sep_examples
 
@@ -32,6 +32,9 @@ function get_sep_example()
 ## Ex3-8DNY20
     ρ["S4"] = get_ρ_DNY20()
 
+## dsf
+    ρ["S5a"] = get_ρ_DTT00a(n,f=1/(2*n))
+    ρ["S5b"] = get_ρ_DTT00b()
 ## Random batch
 ## ℝeal
     ρ["RRai"]   = gen_ρ_RAND((3,3), 5)
@@ -146,6 +149,30 @@ function get_ρ_DNY20()
     H_flat = [i₁*j₁ + i₂*j₂ for i₁ in 1:3 for i₂ in 1:3 for j₁ in 1:3 for j₂ in 1:3 ]
     return  reshape(H_flat,9,9)
 end
+
+
+function get_ρ_DTT00a(n,f=1/(2*n))
+    @assert 0 ≤ f ≤ 1/n  # to be separable
+    f=1/(2*n)
+    @assert 0 ≤ f ≤ 1/n  # to be separable
+    Ψn = (1/sqrt(n))*sum([kron(us.eᵢ(n,i),us.eᵢ(n,i)) for i in 1:n])
+    ρᵥᵥf = f* us.sq(Ψn) + (1-f)/(n^2)*ones(n^2,n^2)
+    ρf =  take_Pᵀ(ρᵥᵥf,1,(n,n))
+end
+
+
+function get_ρ_DTT00b()
+    N = 2/(sqrt(5 + sqrt(5)))
+    h = 0.5*(sqrt(1 + sqrt(5)))
+    Ñ = sqrt(2/sqrt(5))
+
+    v(i) = N .* [cos(2*π*i/5),sin(2*π*i/5),h]
+    w(j) = Ñ .* sqrt(cos(π/5))*[cos(2*π*j/5),sin(2*π*j/5),cos(4*π*j/5),sin(4*π*j/5)]
+
+    (1/140)*(1 .- sum([kron(Utils_states.sq(v(i)),Utils_states.sq(w(i))) for i in 1:4 ]))
+end
+#
+
 
 """generates a matrix of the form ∑ʳaᵀa⊗bᵀb, with a,b ∈ uniform random entry-wise.  d ∈ {2,3,4} , r ∈ [9]"""
 function gen_ρ_RAND(d, r::Integer, isℂ = false)
