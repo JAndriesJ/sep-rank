@@ -2,8 +2,7 @@
 
 # SEP-RANK
 Greeting and welcome to my code for computing lowerboounds on the separable rank.
-see [][] for the paper
-and [][] for a 25 minute talk on the topic.
+see [my talk](https://www.youtube.com/watch?v=46ciiXD3zUk) for a 25 minute talk on the topic.
 
 ### Quick start
 Start by loading the modules
