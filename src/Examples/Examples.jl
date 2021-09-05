@@ -14,7 +14,10 @@ include(srcDir *"Examples_ent.jl")
 using .Utils_states, .Examples_sep, .Examples_ent
 
 export get_example,
-       get_example_overview
+       get_example_overview,
+       gen_ρ_RAND
+
+gen_ρ_RAND(d,r::Integer,isℂ= false) = Examples_sep.gen_ρ_RAND(d, r, isℂ )
 
 """Returns dict with three keys: ["rand", "sep", "ent"] each entry is also a dict."""
 get_example() = merge(Examples_sep.get_sep_example(),Examples_ent.get_ent_example())
@@ -26,6 +29,7 @@ siz_dic = Dict(  4 => (2,2),
                  8 => (2,4),
                  9 => (3,3),
                  10 => (2,5),
+                 12 => (3,4),
                  16 => (4,4))
 
 """Returns a DataFrame object containing the"""

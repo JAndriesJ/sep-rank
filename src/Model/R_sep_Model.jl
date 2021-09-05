@@ -10,7 +10,7 @@ module R_sep_Model
 
     export R_Modelξₜˢᵉᵖ
     """The model"""
-    function Modelξₜˢᵉᵖ(ρ,d,t;con_list="S1sG")
+    function Modelξₜˢᵉᵖ(ρ,d,t;con_list="S1G")
         model = Model()
         @variable(model, Lx[rcon.make_mon_expo_keys(sum(d),t[1])] ) # Create variables
         function set_con(c)
@@ -39,7 +39,7 @@ module R_sep_Model
                 @constraint(model, g₂[k] .==  zeros(size(g₂[k])))
             end
             set_con(loc_con)
-        elseif occursin("S2",con_list)
+        elseif occursin("S3",con_list)
             println("----------S3 constraints active----------")
             loc_con, g₂  =  rcon.make_loc_cons_S3(ρ,d,t,Lx)
             for k in keys(g₂)
@@ -49,7 +49,7 @@ module R_sep_Model
         end
 
 ## G Constraints
-        if  occursin("sG",con_list)
+        if  occursin("G",con_list)
             println("----------G-constraints are active----------")
             set_con(rcon.make_G_con(ρ,d,t,Lx)) # L((ρ-xxᵀ⊗yyᵀ)⊗([x,y]ₜ₋₂[x,y]ᵀₜ₋₂))
         end

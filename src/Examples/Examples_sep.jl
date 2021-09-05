@@ -6,7 +6,8 @@ srcDir = dirname(@__FILE__)*"\\"
 include(srcDir *"Utils_states.jl")
 using .Utils_states ; const us = Utils_states
 
-export get_sep_examples
+export get_sep_examples,
+       gen_ρ_RAND
 
 ## Separable States
 """
@@ -32,8 +33,8 @@ function get_sep_example()
 ## Ex3-8DNY20
     ρ["S4"] = get_ρ_DNY20()
 
-## dsf
-    ρ["S5a"] = get_ρ_DTT00a(n,f=1/(2*n))
+## DTT00a
+    ρ["S5a"] = get_ρ_DTT00a(3)
     ρ["S5b"] = get_ρ_DTT00b()
 ## Random batch
 ## ℝeal
@@ -76,7 +77,9 @@ function get_sep_example()
     ρ["RCciv"]  = gen_ρ_RAND((2,5), 20, true)
     ρ["RCcv"]   = gen_ρ_RAND((2,5), 25, true)
 
-    ρ["RCdv"]   = gen_ρ_RAND((4,4), 25)
+
+    ρ["RCd"]   = gen_ρ_RAND((3,4), 25, true)
+    ρ["RCe"]   = gen_ρ_RAND((2,6), 25, true)
  ## Real
  #    ρ["RANDa1"]  = gen_ρ_RAND(3, 5)
  #    ρ["RANDa2"]  = gen_ρ_RAND(3, 10)
@@ -135,7 +138,7 @@ end
 
 """ http://arxiv.org/abs/1210.0111v2"""
 function get_ρ_Ex26CD12()
-    ρ = [2 0 0 0 0 0
+    ρ = [4 0 0 0 0 0
          0 4 2 0 0 2
          0 2 2 1 -1 0
          0 0 1 2 1 -1
@@ -150,17 +153,16 @@ function get_ρ_DNY20()
     return  reshape(H_flat,9,9)
 end
 
-
-function get_ρ_DTT00a(n,f=1/(2*n))
-    @assert 0 ≤ f ≤ 1/n  # to be separable
-    f=1/(2*n)
-    @assert 0 ≤ f ≤ 1/n  # to be separable
+"""https://arxiv.org/abs/quant-ph/9904005v2 page 7 eq. (11)"""
+function get_ρ_DTT00a(n)
+    #@assert 0 ≤ f ≤ 1/n  # to be separable
+    f=1/(n)
     Ψn = (1/sqrt(n))*sum([kron(us.eᵢ(n,i),us.eᵢ(n,i)) for i in 1:n])
-    ρᵥᵥf = f* us.sq(Ψn) + (1-f)/(n^2)*ones(n^2,n^2)
-    ρf =  take_Pᵀ(ρᵥᵥf,1,(n,n))
+    ρᵥᵥf = f* us.sq(Ψn) + (1-f)/(n^2)*I(n^2)
+    ρf =  us.take_Pᵀ(ρᵥᵥf,1,(n,n))
 end
 
-
+"""https://arxiv.org/abs/quant-ph/9904005v2 page 9 eq. (13)"""
 function get_ρ_DTT00b()
     N = 2/(sqrt(5 + sqrt(5)))
     h = 0.5*(sqrt(1 + sqrt(5)))
@@ -169,10 +171,8 @@ function get_ρ_DTT00b()
     v(i) = N .* [cos(2*π*i/5),sin(2*π*i/5),h]
     w(j) = Ñ .* sqrt(cos(π/5))*[cos(2*π*j/5),sin(2*π*j/5),cos(4*π*j/5),sin(4*π*j/5)]
 
-    (1/140)*(1 .- sum([kron(Utils_states.sq(v(i)),Utils_states.sq(w(i))) for i in 1:4 ]))
+    (1/140)*(I(12) - sum([kron(us.sq(v(i)),us.sq(w(i))) for i in 1:4 ]))
 end
-#
-
 
 """generates a matrix of the form ∑ʳaᵀa⊗bᵀb, with a,b ∈ uniform random entry-wise.  d ∈ {2,3,4} , r ∈ [9]"""
 function gen_ρ_RAND(d, r::Integer, isℂ = false)

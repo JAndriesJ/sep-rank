@@ -9,7 +9,7 @@ module C_sep_Model
     export Modelξₜˢᵉᵖ
 
     """The model"""
-    function Modelξₜˢᵉᵖ(ρ,d,t;con_list ="S∞ sG",noBlock = false)
+    function Modelξₜˢᵉᵖ(ρ,d,t;con_list ="S1G",noBlock = false)
         model = JuMP.Model()
         @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1])])## Create variables
         function set_con(c)
@@ -43,7 +43,7 @@ module C_sep_Model
             set_con(loc_con)
         end
 ## G Constraints
-        if  occursin("sG",con_list)
+        if  occursin("G",con_list)
             #println("----------------G-constraints are active")
             set_con(ccon.make_Gᴿ_con(ρ,d,t,Lx;noBlock=noBlock))
         end

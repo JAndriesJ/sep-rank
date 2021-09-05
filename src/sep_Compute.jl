@@ -27,7 +27,7 @@ function Computeξₜˢᵉᵖ(model)
     println("Objective: ", objective_value(model))
     return model
 end
-Computeξₜˢᵉᵖ(ρ,d,t;con_list ="S∞ sG",noBlock = false,isRe = false) = isRe ?
+Computeξₜˢᵉᵖ(ρ,d,t;con_list ="S1G",noBlock = false,isRe = false) = isRe ?
     Computeξₜˢᵉᵖ(R_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list)) :
     Computeξₜˢᵉᵖ(C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list,noBlock))
 

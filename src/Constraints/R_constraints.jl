@@ -50,8 +50,8 @@ module R_constraints
         return loc_con
     end
 
-    """L(g⋅η) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
-                       g = √(Tr(ρ)) - ∑xᵢ² , √(Tr(ρ)) - ∑yᵢ² """
+    """loc_con: L((√(Tr(ρ)) - ∑xᵢ²)⋅η) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
+            g₂: L((∑xᵢ² -  ∑yᵢ²)⋅η) = 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ """
     function make_loc_cons_S2(ρ,d,t,Lx)
         d₁,d₂ = d ; n = sum(d) ; stρ = sqrt(sum([ρ[i,i] for i in 1:n]))
         MB = mom.get_ℝ_block_diag(d,t.- 1)
@@ -60,29 +60,29 @@ module R_constraints
             xRterm = sum([uc.idx2var(Lx,MB[b] .+ 2* [uc.eᵢ(n,k)])    for k in 1:d₁]) # L((∑xᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
             yRterm = sum([uc.idx2var(Lx,MB[b] .+ 2* [uc.eᵢ(n,k+d₁)]) for k in 1:d₂]) # L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
             loc_con[b,"x"] = stρ*uc.idx2var(Lx,MB[b])-xRterm # √Tr(ρ)⋅L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑xᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
-            loc_con[b,"y"] = stρ*uc.idx2var(Lx,MB[b])-yRterm # √Tr(ρ)⋅L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
-            g₂[b] = xRterm-yRterm
+            # loc_con[b,"y"] = stρ*uc.idx2var(Lx,MB[b])-yRterm # √Tr(ρ)⋅L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
+            g₂[b] = xRterm - yRterm
         end
         return loc_con, g₂
     end
 
-    """ L((Tr(ρ) - ∑xᵢ²)⋅η) ⪰ 0 ∀ η ∈ "even-degree"-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
-        L((∑yᵢ² - 1)⋅η) = 0 """
+    """loc_con: L((Tr(ρ) - ∑xᵢ²)⋅η) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ
+     ideal_con: L((1 -  ∑yᵢ²)⋅η) = 0 ∀ η ∈ even-degree-principle-submatrices of [x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ """
     function make_loc_cons_S3(ρ,d,t,Lx)
         d₁,d₂ = d ; n = sum(d) ; trρ = sum([ρ[i,i] for i in 1:size(ρ)[1]])
         MB    = mom.get_ℝ_block_diag(d,t.- 1)
-        loc_con = Dict() ; g₂ = Dict()
+        loc_con = Dict() ; ideal_con = Dict()
         for b in keys(MB)
             MBLx   = uc.idx2var(Lx, MB[b]) # L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ)
             xRterm = sum([uc.idx2var(Lx, MB[b] .+ [2*uc.eᵢ(n,k)])    for k in 1:d₁]) # L((∑xᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
             yRterm = sum([uc.idx2var(Lx, MB[b] .+ [2*uc.eᵢ(n,k+d₁)]) for k in 1:d₂]) # L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ )
-            loc_con[b] = MBLx-xRterm #  tr(ρ)L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑xᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ ) ⪰ 0
-            g₂[b] = MBLx-yRterm # tr(ρ)L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ ) = 0
+            loc_con[b] = trρ*MBLx-xRterm #  tr(ρ)L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑xᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ ) ⪰ 0
+            ideal_con[b] = MBLx - yRterm #  L([x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ) - L((∑yᵢ²)⋅[x,y]ₜ₋₁[x,y]ₜ₋₁ᵀ ) = 0
         end
-        return loc_con, g₂
+        return loc_con, ideal_con
     end
 
-    """ ρ⊗L(η) - L( (xxᵀ⊗yyᵀ) ⊗ η ) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of ([x,y]₌ₜ₋₂[x,y]₌ₜ₋₂ᵀ) """
+    """ρ⊗L(η) - L((xxᵀ⊗yyᵀ) ⊗ η ) ⪰ 0 ∀ η ∈ even-degree-principle-submatrices of ([x,y]₌ₜ₋₂[x,y]₌ₜ₋₂ᵀ) """
     function make_G_con(ρ,d,t,Lx)
         MB = mom.get_ℝ_block_diag(d,t.- 2) ; xxᵀ⨂yyᵀ = mom.make_xxᵀ⨂yyᵀ(d)
 

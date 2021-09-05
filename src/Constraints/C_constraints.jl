@@ -1,12 +1,9 @@
 module C_constraints
     include(dirname(@__FILE__)*"\\Utils_cons.jl")
     include(dirname(dirname(@__FILE__))*"\\Moments.jl")
-    using .Utils_cons
-    using .Moments
-    using LinearAlgebra
-    const la = LinearAlgebra
-    const uc = Utils_cons
-    const mom = Moments
+    using .Utils_cons ; const uc = Utils_cons
+    using .Moments ; const mom = Moments
+    using LinearAlgebra ; const la = LinearAlgebra
 
     export make_mon_expo_keys,
            make_PSD_con,
@@ -82,7 +79,7 @@ module C_constraints
         loc_con    = Dict() ; loc_con_eq = Dict()
         for b in keys(MMCoefᴿ)
             e_η = MMexᴿ[b] ; c_η = MMCoefᴿ[b]
-            xRterm = tmp(Lx,e_η,c_η,n,1,d₁)    + tmp(Lx,e_η,c_η,n,d₁+1,2*d₁) #  Lᴿ(∑ᵈᵢ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ² ) ⋅ ηₜ₋₁ )
+            xRterm = tmp(Lx,e_η,c_η,n,1,d₁)           + tmp(Lx,e_η,c_η,n,d₁+1,2*d₁) #  Lᴿ(∑ᵈᵢ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ² ) ⋅ ηₜ₋₁ )
             yRterm = tmp(Lx,e_η,c_η,n,2*d₁+1,2*d₁+d₂) + tmp(Lx,e_η,c_η,n,2*d₁+d₂+1,2*d₁+2*d₂) #  Lᴿ(∑ᵈᵢ((yᵣₑ)ᵢ² + (yᵢₘ)ᵢ² ) ⋅ ηₜ₋₁ )
             loc_con[b]    = tr_ρ*uc.idx2var_a(Lx,MMexᴿ[b],MMCoefᴿ[b]) - xRterm #  Tr(ρ)⋅L(ηₜ₋₁) - L(∑ᵈᵢ((xᵣₑ)ᵢ² + (xᵢₘ)ᵢ² ) ⋅ ηₜ₋₁ ) ⪰ 0
             loc_con_eq[b] = uc.idx2var_a(Lx, MMexᴿ[b],MMCoefᴿ[b]) - yRterm #  1⋅L(ηₜ₋₁) -  L(∑ᵈᵢ((yᵣₑ)ᵢ² + (yᵢₘ)ᵢ² ) ⋅ ηₜ₋₁ ) = 0

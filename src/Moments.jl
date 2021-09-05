@@ -243,7 +243,7 @@ end
 """"""
 function get_ℂ_block_diag(d,t;noBlock = false)
     if noBlock
-        MMexᴿ   = Dict("Default" => map(x->[x],make_mon_expo(d,t)))
+        MMexᴿ   = Dict("Default" => map(x->[x],make_mon_expo(d,t) .+ reshape(make_mon_expo(d,t),1,:) ))
         MMCoefᴿ = Dict("Default" => fill([1.0],size(MMexᴿ["Default"])...))
         return MMCoefᴿ,MMexᴿ
     end

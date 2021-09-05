@@ -19,11 +19,11 @@ using DataFrames
 export batch_model
 default_sdir = dirname(dirname(@__FILE__))*"\\assets\\bounds\\"
 """ Produces models for a set of constraints."""
-function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S1sG","S2sG","S3sG"])
+function batch_model(t,ρdic,df;sdir = default_sdir,con_list= ["S1G","S2G","S3G"]) # ,
     for ex in keys(ρdic)
         ρ = ρdic[ex]
         d = filter(:Example => ==(ex),df).Size[1]
-        for con ∈  con_list, isR ∈ ['R', 'C']
+        for con ∈  con_list, isR ∈ ['R','C'] # , 
             (!filter(:Example => ==(ex),df).isReal[1] && (isR == 'R')) ? continue : 0
             println("Currently $isR-modeling example $ex with constraints $con")
             sep_mod = (isR == 'R') ? R_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con) : C_sep_Model.Modelξₜˢᵉᵖ(ρ,d,t;con_list=con,noBlock = false)
@@ -74,19 +74,19 @@ function unstack_constraints(df,bDir = default_sdir)
 
     temp4R_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:R])
     temp4Rus_df = unstack(temp4R_df, :Constraint, :R)
-    rename!(temp4Rus_df,Dict(:S1sG=>:RS1sG, :S2sG => :RS2sG, :S3sG => :RS3sG));
+    rename!(temp4Rus_df,Dict(:S1G=>:RS1G, :S2G => :RS2G, :S3G => :RS3G));
 
     temp4C_df = select(temp4_df,[:Example,:isReal,:isSeparable,:Size,:Bi_rank,:Constraint,:C])
     temp4Cus_df = unstack(temp4C_df, :Constraint, :C)
-    rename!(temp4Cus_df,Dict(:S1sG=>:CS1sG, :S2sG => :CS2sG, :S3sG => :CS3sG));
+    rename!(temp4Cus_df,Dict(:S1G=>:CS1G, :S2G => :CS2G, :S3G => :CS3G));
 
-    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example ,:RS1sG, :RS2sG, :RS3sG]), on = :Example)
+    temp5_df = innerjoin(temp4Cus_df,select(temp4Rus_df,[:Example ,:RS1G, :RS2G, :RS3G]), on = :Example)
 
     CSV.write(bDir*"SummaryUnstacked.csv", temp5_df, delim="&")
-    final_df = DataFrames.select(temp5_df,[:Example,:Size,:Bi_rank,:CS1sG, :CS2sG, :CS3sG, :RS1sG, :RS2sG, :RS3sG, :isSeparable])
+    final_df = DataFrames.select(temp5_df,[:Example,:Size,:Bi_rank,:CS1G, :CS2G, :CS3G, :RS1G, :RS2G, :RS3G, :isSeparable])
     rename!(final_df,Dict(:Example=>:ρ, :Size => :d₁d₂));
     CSV.write(bDir*"t=__.csv", final_df, delim="&")
     return final_df
 end
 
-end 
+end
