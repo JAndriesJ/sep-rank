@@ -11,7 +11,7 @@ module C_sep_Model
     """The model"""
     function Modelξₜˢᵉᵖ(ρ,d,t;con_list ="S1G",noBlock = false)
         model = JuMP.Model()
-        @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1])])## Create variables
+        @variable(model, Lx[ccon.make_mon_expo_keys(d,t[1];noBlock=noBlock)])## Create variables
         function set_con(c)
             for k in keys(c)
                  size(c[k]) == (1, 1) ?

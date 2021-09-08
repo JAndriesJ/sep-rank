@@ -11,6 +11,7 @@
 # Pkg.add("LinearAlgebra")
 
     Pkg.activate(".")
+    #Pkg.instantiate()
     srcDir  = dirname(@__FILE__)*"\\";
     include(srcDir*"Examples\\Examples.jl")
     include(srcDir*"Examples\\Utils_states.jl")
@@ -42,13 +43,14 @@
      0. 0. 0. 0.
      0. 0. 0. 0.
      0. 0. 0. 1.] ;d = (2,2)
-t = (3,3) ; cl = "S1G"  #"S∞ S₂ Sᵦₐₗₗ sG"
+t = (3,3) ;
+
 
 #df = Examples.get_example_meta()
-ex1_m = ex.get_example_meta("S3")
+ex1_m = ex.get_example_meta("RCai")
 d = ex1_m.Size[1]
-ρ = ex.get_example("S3")
-# E6i
+ρ = ex.get_example("RCai")
+
 
 ℂ1_sep_mod = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S1G",noBlock=false)
 ℂ2_sep_mod = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S2G",noBlock=false)
@@ -148,7 +150,7 @@ ADSA1 + ADSA2 + ADSA3
 
 using Random
 
-Random.seed!(343)
+Random.seed!(345)
 function gen__ρ_RAND(d, r::Integer)
     d₁,d₂ = d ; ρ = zeros(d₁*d₂,d₁*d₂)
     a = [randn(1,d₁) + im*randn(1,d₁) for i in 1:r ]
@@ -163,35 +165,39 @@ function gen__ρ_RAND(d, r::Integer)
 end
 
 d = (3,3)
+t = 3
 
-file_loc = dirname(dirname(@__FILE__))*"\\assets\\bounds\\Random.csv"
+
+file_loc = dirname(dirname(@__FILE__))*"\\assets\\bounds\\Randomt$(t)_d_$d.csv"
 touch(file_loc)
 open(file_loc,"a") do io
     write(io, "|S1|S2|S3|T1|T2|T3|P1|P2|P3|D1|D2|D3|\n")
 end
 
-t = 3
-for i in 1:100
+
+
+for i in 1:30
     ρ = gen__ρ_RAND(d, 5)
+    ρ =  ρ / sum([ρ[i,i] for i in 1:size(ρ)[1]])
 
     O1 = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S1G",noBlock=false)
     O2 = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S2G",noBlock=false)
-    O3 = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S3G",noBlock=false)
+    # O3 = sep_Compute.Computeξₜˢᵉᵖ(ρ,d,t;con_list="S3G",noBlock=false)
 
     P1 = string(JuMP.primal_status(O1))
     D1 = string(JuMP.dual_status(O1))
     P2 = string(JuMP.primal_status(O2))
     D2 = string(JuMP.dual_status(O2))
-    P3 = string(JuMP.primal_status(O3))
-    D3 = string(JuMP.dual_status(O3))
+    P3 = "-"#string(JuMP.primal_status(O3))
+    D3 = "-"#string(JuMP.dual_status(O3))
 
     S1   = round(JuMP.objective_value(O1),digits=3)
     S2   = round(JuMP.objective_value(O2),digits=3)
-    S3   = round(JuMP.objective_value(O3),digits=3)
+    S3   = 0#round(JuMP.objective_value(O3),digits=3)
 
     T1 = JuMP.solution_summary(O1).solve_time
     T2 = JuMP.solution_summary(O2).solve_time
-    T3 = JuMP.solution_summary(O3).solve_time
+    T3 = 0#JuMP.solution_summary(O3).solve_time
 
     open(file_loc,"a") do io
         write(io, "|$S1|$S2|$S3|$T1|$T2|$T3|$P1|$P2|$P3|$D1|$D2|$D3|\n")

@@ -13,7 +13,20 @@ module C_constraints
            make_loc_cons_S3,
            make_Gᴿ_con
 
-    make_mon_expo_keys(d,t::Int) = mom.make_mon_expo(d,t*2)
+    function make_mon_expo_keys(d,t::Int;noBlock=false)
+        if noBlock
+            return mom.make_mon_expo(d,t*2)
+        else
+            # Man this is a bootleg solution
+            _,MMᴿexᴿ = mom.get_ℂ_block_diag(d,t,noBlock=false)
+            BB = [keys(MMᴿexᴿ)...]
+            global boko = vcat([[b...] for b in [MMᴿexᴿ[BB[1]]...]]...)
+            for j in 2:size(BB)[1]
+                push!(boko,vcat([[b...] for b in [MMᴿexᴿ[BB[j]]...]]...)...)
+            end
+            return unique(boko)
+        end
+    end
 
     """L([xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜ[xᵣₑ,xᵢₘ,yᵣₑ,yᵢₘ]ₜᵀ) ⪰ 0"""
     function make_PSD_con(d,t,Lx;noBlock=false)

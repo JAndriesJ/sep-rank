@@ -40,13 +40,9 @@ d = (7,7) ; r = 5 ; t = 2
 d = (3,3) ; t = 3
 ## Block
 MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d,t,noBlock=false)
-for b in keys(MMᴿcoef)
-    unique([MMᴿexᴿ[(-2, -1)]...])
-end
+Unique_moms = unique(vcat([unique(vcat([[b...] for b in [MMᴿexᴿ[B]...]]...)) for B in keys(MMᴿexᴿ)]...))
 
-B = [size(unique([MMᴿexᴿ[b]...]))[1] for b in keys(MMᴿcoef)]
-sum(B)
+
 
 ## No block
-# MMᴿcoef,MMᴿexᴿ = mom.get_ℂ_block_diag(d, 2*t,noBlock=true)  # Take too long
-unique(MMᴿexᴿ["Default"])
+binomial(sum(2 .* d) +2*t,2*t)
